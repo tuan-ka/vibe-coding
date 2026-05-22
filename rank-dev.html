@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaopiz — Đánh giá năng lực AI (Dev) · Agentic SDLC / Kari</title>
+<style>
+  :root{
+    --bg:#0f1320; --bg2:#161c2e; --card:#1c2438; --card2:#222c44;
+    --line:#2c3650; --txt:#e7ecf6; --muted:#9aa6c2; --accent:#6c8cff;
+    --accent2:#54e0c7; --good:#3ddc97; --bad:#ff6b81; --warn:#ffcc66;
+    --mid:#ffb454; --lock:#4a5572; --code:#0c1020; --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:linear-gradient(180deg,#0d1018,#0f1320 40%,#10131d);color:var(--txt);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+    line-height:1.6;min-height:100vh;}
+  .wrap{max-width:940px;margin:0 auto;padding:18px 18px 90px}
+  header.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:14px 0 18px;border-bottom:1px solid var(--line);margin-bottom:22px;}
+  header.bar h1{font-size:18px;margin:0}
+  header.bar .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .spacer{flex:1}
+  .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:6px 12px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+  .pill b{color:var(--accent2)}
+  button{font-family:inherit;cursor:pointer}
+  .btn{background:var(--accent);color:#0b1020;border:none;border-radius:10px;
+    padding:10px 16px;font-weight:700;font-size:14px;transition:.15s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--accent)}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .btn.warn{background:var(--warn);color:#3a2c00}
+  .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+  .intro{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:24px}
+  .intro h2{margin:0 0 8px;font-size:16px}
+  .intro p{margin:6px 0;color:var(--muted);font-size:14px}
+  .intro .rules{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .tag{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12.5px;color:var(--muted)}
+  .scorerule{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:12px;font-size:13px;color:var(--muted)}
+  .scorerule b{color:var(--accent2)}
+  /* roadmap */
+  .roadmap{display:flex;flex-direction:column;gap:14px}
+  .lvl{display:flex;gap:16px;align-items:stretch;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);padding:16px 18px;transition:.15s;overflow:hidden}
+  .lvl.open{cursor:pointer}
+  .lvl.open:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .lvl.locked{opacity:.55;filter:grayscale(.3)}
+  .lvl.passed{border-color:var(--good)}
+  .lvl .num{flex:0 0 56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-size:30px;background:var(--bg2);border:1px solid var(--line)}
+  .lvl.passed .num{border-color:var(--good)}
+  .lvl .body{flex:1;min-width:0}
+  .lvl .t{font-weight:700;font-size:16px}
+  .lvl .te{color:var(--muted);font-weight:500;font-size:13px;font-style:italic}
+  .lvl .d{color:var(--muted);font-size:13px;margin-top:6px}
+  .lvl .meta{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .badge{font-size:12px;padding:3px 9px;border-radius:999px;font-weight:700}
+  .badge.lock{background:#2a3147;color:#aab4d0}
+  .badge.pass{background:rgba(61,220,151,.16);color:var(--good)}
+  .badge.todo{background:rgba(108,140,255,.16);color:var(--accent)}
+  .badge.partial{background:rgba(255,204,102,.16);color:var(--warn)}
+  .badge.leader{background:rgba(255,204,102,.18);color:var(--warn)}
+  /* level page */
+  .back{color:var(--muted);background:none;border:none;font-size:14px;padding:6px 0;margin-bottom:6px}
+  .back:hover{color:var(--accent)}
+  .lvl-head{display:flex;gap:16px;align-items:center;margin:6px 0 6px}
+  .lvl-head .num{flex:0 0 60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:34px;background:var(--bg2);border:1px solid var(--line)}
+  .lvl-head h2{margin:0;font-size:20px}
+  .lvl-head .te{color:var(--muted);font-style:italic;font-size:14px}
+  .factbox{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 4px}
+  .fact{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12.5px;color:var(--muted);flex:1;min-width:200px}
+  .fact b{color:var(--txt);display:block;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent2);margin-bottom:2px}
+  .section-label{display:flex;align-items:center;gap:8px;font-size:13px;text-transform:uppercase;
+    letter-spacing:1px;color:var(--muted);margin:24px 0 12px}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--line)}
+  /* leader bar */
+  .leader-bar{background:rgba(255,204,102,.1);border:1px solid var(--warn);border-radius:12px;
+    padding:10px 14px;margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .leader-bar .lab{font-size:13px;color:var(--warn);font-weight:700}
+  .jump{display:flex;gap:6px;flex-wrap:wrap}
+  .jb{border:1px solid var(--line);background:var(--card);color:var(--txt);border-radius:8px;padding:5px 11px;font-size:13px;font-weight:700}
+  .jb:hover{border-color:var(--warn)}
+  .jb.cur{background:var(--warn);color:#3a2c00;border-color:var(--warn)}
+  /* knowledge */
+  details.know{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+  details.know[open]{border-color:var(--accent2)}
+  details.know>summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:700;display:flex;align-items:center;gap:10px;font-size:15px}
+  details.know>summary::-webkit-details-marker{display:none}
+  details.know>summary .chev{transition:.2s;color:var(--accent2)}
+  details.know[open]>summary .chev{transform:rotate(90deg)}
+  .know-inner{padding:0 18px 16px}
+  .lesson{border-top:1px solid var(--line);padding:13px 0}
+  .lesson:first-child{border-top:none}
+  .lesson h4{margin:0 0 6px;font-size:14px;color:var(--txt)}
+  .lesson p{margin:0;color:var(--muted);font-size:13.5px;white-space:pre-line}
+  .reslist{margin:6px 0 0;padding-left:18px}
+  .reslist li{color:var(--muted);font-size:13px;margin:3px 0}
+  .contrib{background:rgba(255,180,84,.1);border:1px solid var(--mid);border-radius:10px;padding:9px 12px;font-size:13px;color:#ffd9a8;margin-top:8px}
+  .ex-cap{margin-top:10px;font-size:12px;color:var(--accent2);font-weight:700}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:auto;margin:6px 0 0}
+  pre code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#cfe0ff;white-space:pre}
+  /* checklist */
+  .ck{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:10px}
+  .ck.good{border-color:rgba(61,220,151,.5)} .ck.mid{border-color:rgba(255,180,84,.5)} .ck.no{border-color:rgba(255,107,129,.35)}
+  .ck .ckt{font-size:13.5px;margin-bottom:9px}
+  .ck .ckb{display:flex;gap:7px;flex-wrap:wrap}
+  .ck .ckb button{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:8px;padding:6px 11px;font-size:12.5px;font-weight:700}
+  .ck .ckb button.good.on{background:rgba(61,220,151,.18);border-color:var(--good);color:var(--good)}
+  .ck .ckb button.mid.on{background:rgba(255,180,84,.18);border-color:var(--mid);color:var(--mid)}
+  .ck .ckb button.no.on{background:rgba(255,107,129,.18);border-color:var(--bad);color:var(--bad)}
+  /* questions */
+  .q{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+  .q.done-ok{border-color:rgba(61,220,151,.5)} .q.done-no{border-color:rgba(255,107,129,.5)}
+  .q .qn{font-size:12px;color:var(--accent);font-weight:800;letter-spacing:.5px}
+  .q .qt{font-size:14px;margin:6px 0 12px;white-space:pre-line;font-weight:600}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;margin:7px 0;cursor:pointer;transition:.12s;background:var(--code)}
+  .opt:hover{border-color:var(--accent)}
+  .opt.selected{border-color:var(--accent);background:rgba(108,140,255,.12)}
+  .opt.correct{border-color:var(--good);background:rgba(61,220,151,.14)}
+  .opt.wrong{border-color:var(--bad);background:rgba(255,107,129,.12)}
+  .opt.locked{cursor:default}
+  .opt .mk{flex:0 0 22px;height:22px;border-radius:6px;background:var(--card2);display:flex;
+    align-items:center;justify-content:center;font-weight:800;font-size:12px;color:var(--muted)}
+  .opt.selected .mk{background:var(--accent);color:#0b1020}
+  .opt.correct .mk{background:var(--good);color:#06281b}
+  .opt.wrong .mk{background:var(--bad);color:#3a0410}
+  .opt .ot{flex:1;font-size:13.5px}
+  .expl{margin-top:10px;border-left:3px solid var(--accent2);padding:9px 12px;background:var(--bg2);
+    border-radius:0 8px 8px 0;font-size:13px;color:#dbe4f7;white-space:pre-line;display:none}
+  .expl.show{display:block}
+  .expl b{color:var(--accent2)}
+  .qbar{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+  /* footer */
+  .scorebar{position:sticky;bottom:0;background:rgba(16,20,32,.92);backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;margin-top:20px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .scorebar .stat{font-size:13.5px;color:var(--muted)}
+  .scorebar .stat b{font-size:16px;color:var(--accent2)}
+  .result{border-radius:var(--r);padding:16px 18px;margin-top:16px;font-size:14px;display:none}
+  .result.show{display:block}
+  .result.ok{background:rgba(61,220,151,.12);border:1px solid var(--good)}
+  .result.no{background:rgba(255,107,129,.1);border:1px solid var(--bad)}
+  .result.warn{background:rgba(255,204,102,.1);border:1px solid var(--warn)}
+  .result h3{margin:0 0 6px}
+  .result.ok h3{color:var(--good)} .result.no h3{color:var(--bad)} .result.warn h3{color:var(--warn)}
+  .result ul{margin:6px 0;padding-left:20px} .result li{font-size:13.5px;margin:3px 0}
+  .result .acts{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+  @media(max-width:560px){header.bar h1{font-size:15px}}
+</style>
+</head>
+<body>
+<div class="wrap"><div id="app"></div></div>
+
+<script>
+/* ====== PIN Leader/Manager — ĐỔI tại đây ====== */
+const LEADER_PIN = "2026";
+const ROLE = "Dev — AI Pilot";
+const ROLE_SHIFT = "Code Author → Code Director + Reviewer";
+const CK_PASS = 0.8;   // % checklist "Thành thạo" để đạt
+const QZ_PASS = 0.8;   // % Knowledge Test để đạt
+
+/* ============================== DATA (Khung Kaopiz · role Dev) ============================== */
+const LEVELS = [
+{
+  id:1, code:"L1", name:"Apprentice", emoji:"🌱", thinking:"Rule-following", time:"Tuần 1–2",
+  role:"Prompt cơ bản, dùng AI sinh code dưới giám sát mentor; chưa review độc lập.",
+  milestone:"Hoàn thành 1 task nhỏ (≤100 LOC) với mentor pair.",
+  checkpoint:"Baseline. Cần nâng lên L2 trong kỳ checkpoint tiếp theo.",
+  concepts:[
+    {heading:"3-Attempt Rule", body:"Nếu AI fail 3 lần liên tiếp cho CÙNG một vấn đề → STOP, KHÔNG patch tiếp. Thay vào đó: đọc lại Spec, chia nhỏ bài toán, đổi cách prompt, hoặc tự làm. Tránh vòng lặp 'AI sửa sai → sai tiếp'.",
+     example:{cap:"Ví dụ log tuân thủ", code:"attempt 1: gen -> test fail (null check)\nattempt 2: gen -> test fail (off-by-one)\nattempt 3: gen -> test fail\n=> STOP. Doc lai Spec, chia nho ham, prompt lai voi vi du ro"}},
+    {heading:"Test-First (TDD cơ bản)", body:"Viết test thể hiện hành vi mong đợi TRƯỚC, rồi mới sinh/viết code cho pass. Test là 'spec sống' — code đúng nghĩa là pass test, không phải 'nhìn có vẻ đúng'."},
+    {heading:"Code Gate (Quality Score ≥ 8.0/10)", body:"Mỗi feature phải vượt Code Gate — chấm chất lượng code ≥ 8.0/10 mới được qua. Ở L1 bạn cần HIỂU Code Gate là gì và đọc được report; chưa cần tự đạt độc lập."},
+    {heading:"Kaopiz DevKit & đọc Spec (SSoT)", body:"DevKit là bộ công cụ nội bộ để generate / review / iterate code. Spec là Single Source of Truth (SSoT) — luôn sinh code BÁM theo Spec, không tự bịa yêu cầu."}
+  ],
+  skills:["Viết prompt cơ bản để sinh code","Hiểu & tuân thủ 3-Attempt Rule","Dùng Kaopiz DevKit cơ bản (generate/review/iterate)","Hiểu Test-First (TDD cơ bản)","Hiểu Code Gate ≥8.0/10","Đọc & hiểu Spec để sinh code đúng","Chạy unit test & đọc kết quả"],
+  checklist:["Hoàn thành Onboarding Kari (2 tuần)","Hoàn thành 1 task nhỏ (≤100 LOC) với mentor pair","Hiểu & tuân thủ 3-Attempt Rule trong thực tế","Vượt Knowledge Test cơ bản ≥80%","Biết dùng Kaopiz DevKit: generate, review, iterate","Viết ≥3 unit test cases với AI hỗ trợ"],
+  courses:["Kari Onboarding Program (bắt buộc, 2 tuần)","Kaopiz DevKit Fundamentals — hands-on","Test-First Development (TDD) Basics","Vibe Coding & Prompt Engineering Basics","Knowledge Test: TDD + Kari Ecosystem (≥80%)"],
+  contribution:"Không yêu cầu training contribution ở L1.",
+  quiz:[
+    {q:"3-Attempt Rule nghĩa là gì?", options:["Thử tối đa 3 prompt rồi nghỉ giải lao.","AI fail 3 lần liên tiếp cùng vấn đề → STOP, không patch tiếp, đổi cách (đọc lại Spec / chia nhỏ / tự làm).","Mỗi feature phải review 3 lần.","Chỉ được commit sau 3 lần chạy test."], correct:1,
+     explanation:"3-Attempt Rule ngăn vòng lặp 'AI sửa sai → sai tiếp'. Fail 3 lần là tín hiệu phải đổi cách tiếp cận, không cố patch."},
+    {q:"Code Gate yêu cầu Quality Score tối thiểu bao nhiêu để pass?", options:["≥5.0/10","≥6.5/10","≥8.0/10","Đúng 10/10"], correct:2,
+     explanation:"Code Gate của Kaopiz đặt ngưỡng Quality Score ≥ 8.0/10."},
+    {q:"Test-First (TDD) nghĩa là?", options:["Viết code xong rồi mới viết test.","Viết test (hành vi mong đợi) TRƯỚC, rồi mới code cho pass.","Chỉ test thủ công bằng tay.","Để AI tự quyết có cần test hay không."], correct:1,
+     explanation:"Test-First: test trước, code sau. Test là spec sống để xác minh hành vi."},
+    {q:"Vai trò mong đợi của Dev ở L1 Apprentice là?", options:["Tin tưởng AI và commit ngay.","Dùng AI sinh code DƯỚI GIÁM SÁT mentor, hiểu test-first & code review; chưa review độc lập.","Tự định nghĩa coding standard cho team.","Coach người khác lên L2."], correct:1,
+     explanation:"L1 là học việc: làm theo recipe dưới giám sát, chưa tự chủ/ chưa review độc lập."},
+    {q:"Ở L1, với Kaopiz DevKit bạn cần biết làm gì?", options:["Contribute vào core DevKit.","Generate code, review, iterate ở mức cơ bản.","Tự viết plugin cho DevKit.","Không cần dùng DevKit."], correct:1,
+     explanation:"L1 chỉ cần dùng DevKit cơ bản: generate / review / iterate."}
+  ]
+},
+{
+  id:2, code:"L2", name:"Practitioner", emoji:"🥉", thinking:"Pattern recognition", time:"Tháng 1–2",
+  role:"Tự deliver feature module nhỏ, biết Test-First + 3-Attempt Rule, solo pass Code Gate.",
+  milestone:"Solo 1 feature pass Code Gate (Quality ≥ 8.0/10).",
+  checkpoint:"Mức TỐI THIỂU cho Dev. Được assign feature chính thức trong dự án Agentic.",
+  concepts:[
+    {heading:"RED → GREEN → REFACTOR", body:"Chu trình TDD: RED (viết test, test fail vì chưa có code) → GREEN (viết code tối thiểu cho pass) → REFACTOR (dọn code, giữ test xanh). Lặp cho từng hành vi."},
+    {heading:"Layer 1 — Auto Review", body:"Lớp review TỰ ĐỘNG (tooling/linter/static analysis/AI) bắt các lỗi máy phát hiện được. Dev L2 cần hiểu và FIX độc lập các lỗi Layer 1, không bỏ qua cảnh báo."},
+    {heading:"Prompt engineering trung cấp", body:"Prompt tốt = Context (file/spec liên quan) + Constraints (ràng buộc, không dùng gì) + Examples (mẫu input/output). Mơ hồ → AI đoán → lệch."},
+    {heading:"Kari Hub", body:"Kho dùng chung của công ty để TÌM và (về sau) ĐĂNG Skills / patterns / prompt template. L2 biết tra Kari Hub để tái dùng thay vì làm lại."}
+  ],
+  skills:["Tự deliver feature module nhỏ độc lập","Test-First: RED→GREEN→REFACTOR","3-Attempt Rule thuần thục","Code Gate ≥8.0 độc lập","Layer 1 Auto Review: hiểu & fix lỗi","Prompt engineering trung cấp (context/constraints/examples)","Đọc & implement theo Spec chính xác","Dùng Kari Hub tìm Skills/patterns"],
+  checklist:["Tự deliver ≥2 features nhỏ pass Code Gate ≥8.0","Thực hành Test-First trên ≥3 tasks thực tế","Chứng minh tuân thủ 3-Attempt Rule (có log)","Fix ≥5 lỗi Layer 1 Auto Review độc lập","Hoàn thành Practical Project L2","Peer review ≥70%"],
+  courses:["Prompt Engineering Intermediate — workshop","TDD Hands-on Lab (dự án thực)","Code Gate & Quality Score — internal","Kaopiz DevKit Advanced","Knowledge Test L2 ≥80% + Practical Project (code feature)"],
+  contribution:"Không bắt buộc — khuyến khích chia sẻ prompt template với team.",
+  quiz:[
+    {q:"Chu trình Test-First đúng là?", options:["GREEN → RED → REFACTOR","RED (test fail) → GREEN (code cho pass) → REFACTOR (dọn code)","REFACTOR → RED → GREEN","CODE → TEST → COMMIT"], correct:1,
+     explanation:"RED (test fail) → GREEN (code tối thiểu cho pass) → REFACTOR (dọn dẹp, test vẫn xanh)."},
+    {q:"\"Layer 1 — Auto Review\" là gì?", options:["Người review thủ công đầu tiên.","Lớp review TỰ ĐỘNG (tooling) bắt lỗi máy phát hiện; Dev L2 cần hiểu & fix độc lập.","Review của khách hàng.","Review bảo mật cấp SBU."], correct:1,
+     explanation:"Layer 1 là review tự động bằng công cụ; Layer 2 mới là review của con người."},
+    {q:"Milestone CHÍNH để đạt L2 (Dev) là?", options:["Coach 2 người lên L2.","Solo deliver 1 feature pass Code Gate ≥8.0.","Publish 5 Skills lên Kari Hub.","Lead multi-module project."], correct:1,
+     explanation:"L2 = tự deliver feature module nhỏ pass Code Gate độc lập."},
+    {q:"Kari Hub dùng để làm gì?", options:["Chat hỏi đáp với AI.","Tìm/đăng Skills, patterns, prompt template dùng chung cho team.","Quản lý sprint & timeline.","Sinh test tự động."], correct:1,
+     explanation:"Kari Hub là kho Skills/patterns dùng chung — tra để tái dùng, về sau publish đóng góp."},
+    {q:"Prompt engineering trung cấp gồm yếu tố nào?", options:["Chỉ cần câu lệnh thật ngắn.","Context + Constraints + Examples rõ ràng.","Càng dài càng tốt.","Để AI tự đoán hết."], correct:1,
+     explanation:"Prompt hiệu quả = bối cảnh + ràng buộc + ví dụ; giúp AI bám đúng yêu cầu."}
+  ]
+},
+{
+  id:3, code:"L3", name:"Proficient", emoji:"🥈", thinking:"Holistic view", time:"Tháng 2–6",
+  role:"Tự chủ feature phức tạp; review Layer 2 cho peer; 4-layer review thuần thục; training trong dự án.",
+  milestone:"Lead 1 module lớn + đóng góp ≥1 Skill lên Kari Hub.",
+  checkpoint:"Khuyến nghị cho Dev kinh nghiệm. Approve PR của L1/L2. Tăng điểm checkpoint rõ rệt.",
+  concepts:[
+    {heading:"4-layer review & Layer 2 (Human Review)", body:"Quy trình review 4 lớp. Layer 2 là review của CON NGƯỜI, theo rubric ~9 điểm, tập trung 3 trục: Logic vs Spec (code có đúng yêu cầu không), Architecture boundary (có phá ranh giới kiến trúc không), Security. L3 thực hiện Layer 2 cho PR của peer."},
+    {heading:"AI Slop", body:"Output AI nhìn 'hợp lý' nhưng kém chất lượng / sai tinh vi: code thừa, lặp, không bám Spec, bug ẩn, over-engineering. Kỹ năng L3 là PHÁT HIỆN và remediate AI Slop khi review."},
+    {heading:"Publish Skill lên Kari Hub", body:"Đóng gói tri thức/pattern/prompt tái dùng thành Skill và publish lên Kari Hub. KPI gợi ý ≥1 Skill/dev/quý — gắn vào performance review."},
+    {heading:"Architecture patterns cho AI-generated code", body:"Áp pattern kiến trúc (layering, boundary, separation of concerns) để giữ code AI sinh sạch và mở rộng được; tránh để AI 'nhét' logic sai tầng."}
+  ],
+  skills:["Tự chủ feature/module phức tạp end-to-end","Layer 2 Human Review (Logic vs Spec, Architecture boundary, Security)","4-layer review thuần thục","Phát hiện & fix AI Slop","Publish ≥1 Skill lên Kari Hub","Chủ động cải tiến Prompt/Rule cho team","Architecture patterns cho AI-gen code","Performance optimization","Mentor Dev L1/L2 trong dự án"],
+  checklist:["Lead thành công ≥1 module lớn (≥5 features) trong dự án thực","Perform Layer 2 review cho ≥10 PRs của peer","Publish ≥1 Skill/prompt template lên Kari Hub","Phát hiện & fix ≥3 AI Slop issues trong review","Training/hướng dẫn ≥1 Dev L1 trong dự án lên L2","Practical Project L3 đạt yêu cầu","Peer review ≥75% từ ≥2 reviewer"],
+  courses:["Layer 2 Code Review Techniques — workshop","Architecture Patterns for AI-Generated Code","Security Review: OWASP Top 10 + AI-specific risks","AI Slop Detection & Remediation","Kari Hub Content Creation","Knowledge Test L3 ≥80% + Practical Project phức tạp"],
+  contribution:"BẮT BUỘC: training/hướng dẫn ≥1 Dev trong dự án lên L2 (có ghi nhận từ leader).",
+  quiz:[
+    {q:"Layer 2 (Human Review) trong 4-layer review tập trung vào?", options:["Chỉ format & style code.","Logic vs Spec, Architecture boundary, Security (rubric ~9 điểm).","Chỉ chính tả trong comment.","Chỉ tốc độ build."], correct:1,
+     explanation:"Layer 2 là review của con người: code có đúng Spec không, có phá kiến trúc không, có lỗ hổng bảo mật không."},
+    {q:"\"AI Slop\" là gì?", options:["Code AI sinh chất lượng cao.","Output AI nhìn hợp lý nhưng kém chất lượng / sai tinh vi (thừa, lặp, lệch spec, bug ẩn) — cần phát hiện & fix.","Một loại unit test.","Tên một Skill trên Kari Hub."], correct:1,
+     explanation:"AI Slop = 'rác AI' trông ổn nhưng có vấn đề tinh vi; review phải bắt được và remediate."},
+    {q:"Điều kiện CONTRIBUTION bắt buộc để lên L3 (Dev) là?", options:["Không có yêu cầu.","Training/hướng dẫn ≥1 Dev trong dự án lên L2 (ghi nhận leader).","Coach ≥2 PM lên L2.","Publish ≥5 Skills."], correct:1,
+     explanation:"L3 bắt đầu yêu cầu đóng góp: phải training ít nhất 1 Dev cùng dự án lên L2."},
+    {q:"Ở checkpoint, L3 Dev được quyền gì?", options:["Chỉ làm task nhỏ.","Approve PR của L1/L2, lead module; tăng điểm checkpoint.","Quyết định chiến lược toàn công ty.","Không thay đổi gì."], correct:1,
+     explanation:"L3 tự chủ + approve PR L1/L2 + lead module; đóng góp đáng kể vào checkpoint."},
+    {q:"Mục đích publish Skill lên Kari Hub ở L3?", options:["Để khoe cá nhân.","Đóng góp tri thức tái sử dụng cho team (KPI ≥1 Skill/quý).","Bắt buộc xoá sau khi dùng.","Chỉ để vượt qua review."], correct:1,
+     explanation:"Skill là tri thức đóng gói tái dùng; publish lên Kari Hub là đóng góp gắn KPI."}
+  ]
+},
+{
+  id:4, code:"L4", name:"Expert", emoji:"🥇", thinking:"Intuitive grasp", time:"Tháng 6–9",
+  role:"Lead multi-module project; coach junior; define standards/Skills cho team; training cấp SBU.",
+  milestone:"Coach ≥2 Dev lên L2; publish ≥5 Skills; lead module lớn thành công.",
+  checkpoint:"Tiêu chí CHÍNH xét Senior Dev / Tech Lead. Tham gia Tech Lead circle.",
+  concepts:[
+    {heading:"Define coding standards & governance", body:"Định nghĩa và enforce coding standard + AI workflow cho cả team; thiết kế governance để code AI-gen nhất quán, an toàn, dễ maintain ở quy mô lớn."},
+    {heading:"Architecture design cho AI-generated systems", body:"Thiết kế kiến trúc tổng thể cho hệ thống có code AI sinh; đặt ranh giới module rõ để AI 'điền' đúng chỗ, tránh coupling và drift."},
+    {heading:"Security review expert (OWASP + AI-specific)", body:"Review bảo mật toàn dự án theo OWASP Top 10 + rủi ro đặc thù AI (prompt injection, secret leak, dữ liệu nhạy cảm trong context, dependency AI gợi ý)."},
+    {heading:"Coaching & contribute DevKit", body:"Coach ≥2 Dev junior lên L2 (có ghi nhận), lead workshop cấp SBU, và đóng góp cải tiến vào Kaopiz DevKit (≥5 Skills được team dùng thật)."}
+  ],
+  skills:["Lead multi-module project phức tạp","Coach ≥2–3 Dev junior lên L2","Define coding standards & Skills cho team","Architecture design cho AI-gen systems","Security review expert toàn dự án","Publish ≥5 Skills được team dùng","Lead training/workshop Dev cho SBU","Contribute vào Kaopiz DevKit"],
+  checklist:["Coach thành công ≥2 Dev lên L2 (ghi nhận chính thức)","Publish ≥5 Skills/patterns được team sử dụng thực tế","Lead ≥1 multi-module project (≥3 modules) thành công","Define ≥1 coding standard được adopt ở team/SBU","Lead training Dev workshop tại SBU (≥1 buổi, ≥10 người)","Practical Project L4 nâng cao đạt yêu cầu"],
+  courses:["Technical Leadership & Architecture","Advanced Security Review & OWASP","Kaopiz DevKit Deep-Dive & Contribution","Training Facilitation for Dev Teams","Knowledge Test L4 ≥80% + Practical Project nâng cao"],
+  contribution:"BẮT BUỘC: lead Dev workshop cấp SBU + coach ≥2 Dev lên L2 + publish ≥5 Skills.",
+  quiz:[
+    {q:"L4 Expert (Dev) khác L3 chủ yếu ở điểm nào?", options:["Vẫn chỉ làm 1 module như L3.","Lead multi-module, COACH ≥2 Dev lên L2, define standards/Skills, training cấp SBU.","Chỉ viết nhiều code hơn.","Không coach ai cả."], correct:1,
+     explanation:"L4 chuyển từ 'tự chủ cá nhân' (L3) sang 'nhân rộng qua người khác': coach, define standard, training SBU."},
+    {q:"Contribution bắt buộc để lên L4?", options:["Không có yêu cầu.","Coach ≥2 Dev lên L2 + publish ≥5 Skills + lead workshop cấp SBU.","Chỉ cần pass quiz.","Lead 1 task nhỏ."], correct:1,
+     explanation:"L4 yêu cầu đóng góp ở cấp team/SBU: coaching, Skills, training."},
+    {q:"Security review ở L4 yêu cầu nắm gì?", options:["Không cần quan tâm security.","OWASP Top 10 + rủi ro AI-specific, review toàn dự án.","Chỉ SQL injection.","Chỉ chạy linter là đủ."], correct:1,
+     explanation:"L4 là security review expert: OWASP + rủi ro đặc thù AI cho cả dự án."},
+    {q:"L4 là tiêu chí để xét điều gì?", options:["Onboarding.","Senior Dev / Tech Lead (promotion).","Vị trí thực tập.","Không liên quan promotion."], correct:1,
+     explanation:"L4 là tiêu chí chính xét Senior Dev / Tech Lead."},
+    {q:"\"Define coding standard được adopt ở team/SBU\" thuộc cấp nào?", options:["L1","L2","L4","Không cấp nào"], correct:2,
+     explanation:"Định nghĩa standard cho team/SBU là năng lực của L4 Expert."}
+  ]
+},
+{
+  id:5, code:"L5", name:"Master", emoji:"💎", thinking:"Transcend rules", time:"12–18+ tháng",
+  role:"Set technical direction cấp công ty; contribute Kari ecosystem; industry recognition.",
+  milestone:"Lead transformation ≥1 SBU; contribute Kari DevKit core.",
+  checkpoint:"Principal Engineer equivalent. Tham gia technology strategy toàn công ty. <5% workforce.",
+  concepts:[
+    {heading:"Set technical direction cấp công ty", body:"Định hướng kỹ thuật & chuẩn AI-assisted development cho toàn công ty; dẫn dắt transformation ở quy mô SBU trở lên."},
+    {heading:"Contribute Kari / DevKit core", body:"Đóng góp trực tiếp vào core của Kaopiz DevKit / Kari ecosystem (feature/merge có tài liệu), không chỉ dùng mà còn xây nền tảng cho người khác."},
+    {heading:"Thought leadership & research", body:"Industry recognition: blog/paper/conference talk; nghiên cứu paradigm AI coding mới; mentor Tech Lead và L4 Expert."}
+  ],
+  skills:["Set technical direction cho toàn công ty","Contribute Kaopiz DevKit / Kari core","Industry recognition (blog/talk)","Research emerging AI coding paradigms","Mentor Tech Leads & L4 Experts"],
+  checklist:["Lead technical transformation cho ≥1 SBU","Contribute cụ thể vào Kari DevKit (documented merge/feature)","Publish ≥1 thought piece hoặc conference talk","Knowledge Test ≥90%"],
+  courses:["Advanced AI Research & Engineering","Kari DevKit Core Contribution (với Kari team)","Knowledge Test L5 ≥90%"],
+  contribution:"BẮT BUỘC: lead transformation ≥1 SBU + contribute Kari DevKit core.",
+  quiz:[
+    {q:"Tỷ lệ workforce điển hình đạt L5 Master?", options:["~50%","~25%","<5%","100%"], correct:2,
+     explanation:"L5 là đỉnh — chưa tới 5% nhân sự đạt được."},
+    {q:"Contribution bắt buộc để đạt L5 (Dev)?", options:["Lead transformation ≥1 SBU + contribute Kari DevKit core.","Chỉ cần pass quiz ≥80%.","Coach 1 người lên L2.","Không có yêu cầu."], correct:0,
+     explanation:"L5 yêu cầu dẫn dắt transformation cấp SBU và đóng góp vào core của ecosystem."},
+    {q:"Knowledge Test ngưỡng pass cho cấp L5?", options:["≥70%","≥80%","≥90%","≥100%"], correct:2,
+     explanation:"L5 nâng ngưỡng Knowledge Test lên ≥90% (các cấp L2–L4 là ≥80%)."},
+    {q:"L5 Dev tương đương vị trí gì?", options:["Junior Developer.","Principal Engineer equivalent, tham gia technology strategy công ty.","Intern.","QA Engineer."], correct:1,
+     explanation:"L5 Dev ngang Principal Engineer, tham gia định hướng công nghệ toàn công ty."},
+    {q:"Đóng góp đặc trưng của L5 là gì?", options:["Chỉ làm task được giao.","Set technical direction công ty + contribute Kari core + industry recognition.","Chỉ review PR của peer.","Onboarding người mới."], correct:1,
+     explanation:"L5 là thought leader: định hướng kỹ thuật, đóng góp nền tảng, được công nhận trong ngành."}
+  ]
+}
+];
+
+/* ============================== STATE ============================== */
+const STORAGE_KEY = "kaopizDevCompetency.v1";
+let state = loadState();
+let currentLevelId = null;
+let forceKnowledgeOpen = false;
+
+function defaultState(){ return { unlockedLevel:1, leader:false, perLevel:{} }; }
+function loadState(){
+  try{ const s=JSON.parse(localStorage.getItem(STORAGE_KEY)); if(s&&s.perLevel){ if(typeof s.leader!=="boolean") s.leader=false; return s;} }catch(e){}
+  return defaultState();
+}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function levelState(id){
+  let ls=state.perLevel[id];
+  if(!ls||!("checklist" in ls)){ ls={checklist:{},choices:{},checked:{},passed:ls&&ls.passed||false}; state.perLevel[id]=ls; }
+  return ls;
+}
+function ckGood(id){ const ls=state.perLevel[id]; if(!ls) return 0; return Object.values(ls.checklist||{}).filter(v=>v==="good").length; }
+function ckPct(id){ const lv=LEVELS.find(l=>l.id===id); return lv.checklist.length? ckGood(id)/lv.checklist.length : 0; }
+function qzCorrect(id){ const lv=LEVELS.find(l=>l.id===id), ls=state.perLevel[id]; if(!ls) return 0;
+  let c=0; lv.quiz.forEach((q,i)=>{ if(ls.checked&&ls.checked[i]&&ls.choices[i]===q.correct) c++; }); return c; }
+function qzNeed(id){ const lv=LEVELS.find(l=>l.id===id); const ratio=lv.code==="L5"?0.9:QZ_PASS; return Math.ceil(ratio*lv.quiz.length); }
+function isPassNow(id){ const lv=LEVELS.find(l=>l.id===id);
+  return ckPct(id)>=CK_PASS && qzCorrect(id)>=qzNeed(id); }
+function passedCount(){ return LEVELS.filter(l=>state.perLevel[l.id]&&state.perLevel[l.id].passed).length; }
+function isUnlocked(id){ return state.leader || id<=state.unlockedLevel; }
+function started(id){ const ls=state.perLevel[id]; if(!ls) return false;
+  return Object.keys(ls.checklist||{}).length>0 || Object.keys(ls.choices||{}).length>0; }
+
+/* ============================== DOM HELPER ============================== */
+function h(tag, attrs, ...kids){
+  const e=document.createElement(tag); attrs=attrs||{};
+  for(const k in attrs){ const v=attrs[k]; if(v==null||v===false) continue;
+    if(k==="class") e.className=v; else if(k==="html") e.innerHTML=v;
+    else if(k.slice(0,2)==="on"&&typeof v==="function") e.addEventListener(k.slice(2).toLowerCase(),v);
+    else e.setAttribute(k,v); }
+  kids.flat().forEach(c=>{ if(c==null||c===false) return; e.appendChild(typeof c==="object"?c:document.createTextNode(String(c))); });
+  return e;
+}
+const LETTER=["A","B","C","D","E","F"];
+
+/* ============================== RENDER ============================== */
+function render(){
+  const app=document.getElementById("app"); app.innerHTML="";
+  app.appendChild(header());
+  app.appendChild(currentLevelId==null?overview():levelView(currentLevelId));
+  window.scrollTo(0,0);
+}
+function header(){
+  const right=[h("div",{class:"pill"},"Đã đạt: ",h("b",{},passedCount()+" / "+LEVELS.length))];
+  if(state.leader){ right.push(h("span",{class:"badge leader"},"👤 Leader mode")); right.push(h("button",{class:"btn ghost sm",onclick:exitLeader},"Thoát")); }
+  else right.push(h("button",{class:"btn ghost sm",onclick:promptLeader},"👤 Leader"));
+  right.push(h("button",{class:"btn ghost sm",onclick:resetProgress},"Reset"));
+  return h("header",{class:"bar"},
+    h("div",{}, h("h1",{},"🛠 Kaopiz — Năng lực AI · "+ROLE),
+      h("div",{class:"sub"},"Khung Agentic SDLC / Kari · Dreyfus 5 cấp · "+ROLE_SHIFT)),
+    h("div",{class:"spacer"}), ...right);
+}
+function overview(){
+  const box=h("div",{});
+  box.appendChild(h("div",{class:"intro"},
+    h("h2",{},"Cách hoạt động"),
+    h("p",{},"Khung 5 cấp theo độ TỰ CHỦ (Dreyfus): Apprentice → Practitioner → Proficient → Expert → Master. Đây là bản cho role "+ROLE+"."),
+    h("p",{},"Mỗi cấp gồm: (1) Checklist năng lực — bạn tự đánh giá từng mục: Thành thạo / Cần hỗ trợ / Chưa; (2) Knowledge Test trắc nghiệm về khái niệm Kaopiz; (3) phần kiến thức, khoá học & contribution cần đạt."),
+    h("div",{class:"scorerule"},
+      h("b",{},"Quy ước đạt cấp trong tool này: "),
+      "Checklist ≥ 80% mục “Thành thạo”  +  Knowledge Test ≥ 80% (L5: ≥ 90%). ",
+      "Theo khung chính thức Kaopiz, điểm đầy đủ = Knowledge Test 20% + Practical Project 50% + Peer & Mentor Review 30% — phần Practical & Peer do Leader verify ngoài tool."),
+    h("div",{class:"rules"},
+      h("span",{class:"tag"},"🔓 Mở dần theo cấp"),
+      h("span",{class:"tag"},"✅ Self-checklist 3 mức"),
+      h("span",{class:"tag"},"📝 Knowledge Test"),
+      h("span",{class:"tag"},"👤 Leader verify Practical/Peer"))
+  ));
+  const road=h("div",{class:"roadmap"});
+  LEVELS.forEach(lv=>{
+    const ls=state.perLevel[lv.id], locked=!isUnlocked(lv.id), passed=ls&&ls.passed;
+    let badge;
+    if(locked) badge=h("span",{class:"badge lock"},"🔒 Khoá");
+    else if(passed) badge=h("span",{class:"badge pass"},"✓ Đạt cấp này");
+    else if(started(lv.id)) badge=h("span",{class:"badge partial"},"… Đang đánh giá");
+    else badge=h("span",{class:"badge todo"},"Sẵn sàng");
+    const card=h("div",{class:"lvl "+(locked?"locked":"open")+(passed?" passed":""),
+      onclick:locked?null:()=>{currentLevelId=lv.id;forceKnowledgeOpen=false;render();}},
+      h("div",{class:"num"},locked?"🔒":lv.emoji),
+      h("div",{class:"body"},
+        h("div",{class:"t"},lv.code+" — "+lv.name+"  ·  "+lv.thinking),
+        h("div",{class:"te"},lv.role),
+        h("div",{class:"meta"}, badge,
+          locked?h("span",{class:"d"},"→ đạt "+LEVELS[lv.id-2].code+" để mở")
+                :h("span",{class:"d"},lv.checklist.length+" mục checklist · "+lv.quiz.length+" câu test · ~"+lv.time))));
+    road.appendChild(card);
+  });
+  box.appendChild(road);
+  return box;
+}
+function levelView(id){
+  const lv=LEVELS.find(l=>l.id===id), ls=levelState(id);
+  const box=h("div",{});
+  box.appendChild(h("button",{class:"back",onclick:()=>{currentLevelId=null;render();}},"← Về lộ trình"));
+  if(state.leader){
+    const jump=h("div",{class:"jump"});
+    LEVELS.forEach(l=>jump.appendChild(h("button",{class:"jb"+(l.id===id?" cur":""),onclick:()=>{currentLevelId=l.id;forceKnowledgeOpen=false;render();}},l.code)));
+    box.appendChild(h("div",{class:"leader-bar"}, h("span",{class:"lab"},"👤 Leader:"), jump, h("div",{class:"spacer"}),
+      h("button",{class:"btn warn sm",onclick:()=>leaderPass(id)}, id<LEVELS.length?"⏭ Xác nhận đạt & sang "+LEVELS[id].code:"⏭ Xác nhận đạt")));
+  }
+  box.appendChild(h("div",{class:"lvl-head"}, h("div",{class:"num"},lv.emoji),
+    h("div",{}, h("h2",{},lv.code+" "+lv.name+" — "+ROLE.split(" — ")[0]),
+      h("div",{class:"te"},lv.thinking+" · "+ROLE_SHIFT))));
+  box.appendChild(h("div",{class:"factbox"},
+    h("div",{class:"fact"}, h("b",{},"Vai trò ở cấp này"), lv.role),
+    h("div",{class:"fact"}, h("b",{},"Milestone xác nhận"), lv.milestone),
+    h("div",{class:"fact"}, h("b",{},"Ảnh hưởng checkpoint"), lv.checkpoint)));
+
+  /* knowledge */
+  box.appendChild(h("div",{class:"section-label"},"📚 Kiến thức · Khoá học · Contribution cần đạt"));
+  const det=h("details",{class:"know"}); if(forceKnowledgeOpen) det.open=true;
+  det.appendChild(h("summary",{},h("span",{class:"chev"},"▶"),"Mở bài giảng "+lv.code+" ("+lv.concepts.length+" khái niệm + skills + khoá học)"));
+  const inner=h("div",{class:"know-inner"});
+  lv.concepts.forEach(k=>{
+    const b=h("div",{class:"lesson"}, h("h4",{},"◆ "+k.heading), h("p",{},k.body));
+    if(k.example){ b.appendChild(h("div",{class:"ex-cap"},"▎ "+k.example.cap));
+      const pre=h("pre",{}),code=h("code",{}); code.textContent=k.example.code; pre.appendChild(code); b.appendChild(pre); }
+    inner.appendChild(b);
+  });
+  const sk=h("div",{class:"lesson"}, h("h4",{},"🧩 Skills cần nắm vững"));
+  const skul=h("ul",{class:"reslist"}); lv.skills.forEach(s=>skul.appendChild(h("li",{},s))); sk.appendChild(skul); inner.appendChild(sk);
+  const co=h("div",{class:"lesson"}, h("h4",{},"🎓 Khoá học / Training bắt buộc"));
+  const coul=h("ul",{class:"reslist"}); lv.courses.forEach(s=>coul.appendChild(h("li",{},s))); co.appendChild(coul);
+  co.appendChild(h("div",{class:"contrib"}, h("b",{},"Contribution: "), lv.contribution)); inner.appendChild(co);
+  det.appendChild(inner); box.appendChild(det);
+
+  /* checklist */
+  box.appendChild(h("div",{class:"section-label"},"✅ Checklist năng lực — tự đánh giá ("+lv.checklist.length+" mục)"));
+  lv.checklist.forEach((item,i)=>box.appendChild(ckCard(lv,i,item,ls)));
+
+  /* quiz */
+  box.appendChild(h("div",{class:"section-label"},"📝 Knowledge Test ("+lv.quiz.length+" câu)"));
+  lv.quiz.forEach((qq,i)=>box.appendChild(quizCard(lv,i,qq,ls)));
+
+  /* scorebar */
+  const stat=h("div",{class:"stat",id:"scorestat"}); fillStat(stat,id);
+  box.appendChild(h("div",{class:"scorebar"}, stat, h("div",{class:"spacer"}),
+    h("button",{class:"btn",onclick:()=>assess(id)},"Đánh giá cấp "+lv.code)));
+  box.appendChild(h("div",{class:"result",id:"result"}));
+  return box;
+}
+function fillStat(el,id){
+  const lv=LEVELS.find(l=>l.id===id);
+  const ckp=Math.round(ckPct(id)*100), need=Math.round(CK_PASS*100);
+  el.innerHTML="";
+  el.appendChild(document.createTextNode("Checklist Thành thạo: "));
+  el.appendChild(h("b",{},ckGood(id)+"/"+lv.checklist.length+" ("+ckp+"%)"));
+  el.appendChild(document.createTextNode("  ·  Test đúng: "));
+  el.appendChild(h("b",{},qzCorrect(id)+"/"+lv.quiz.length));
+  el.appendChild(document.createTextNode("  — cần ≥"+need+"% checklist & ≥"+qzNeed(id)+"/"+lv.quiz.length+" test"));
+}
+function updateScoreBar(id){ const el=document.getElementById("scorestat"); if(el) fillStat(el,id); }
+
+function ckCard(lv,i,item,ls){
+  const v=ls.checklist[i];
+  const card=h("div",{class:"ck"+(v?" "+v:"")});
+  card.appendChild(h("div",{class:"ckt"},(i+1)+". "+item));
+  const bar=h("div",{class:"ckb"});
+  const defs=[["good","✅ Thành thạo"],["mid","🟡 Cần hỗ trợ"],["no","⬜ Chưa"]];
+  const btns={};
+  defs.forEach(([key,label])=>{
+    const b=h("button",{class:key+(v===key?" on":"")},label);
+    b.addEventListener("click",()=>{
+      ls.checklist[i]=key; saveState();
+      defs.forEach(([k2])=>{ btns[k2].className=k2+(k2===key?" on":""); });
+      card.className="ck "+key; updateScoreBar(lv.id);
+    });
+    btns[key]=b; bar.appendChild(b);
+  });
+  card.appendChild(bar); return card;
+}
+function quizCard(lv,i,qq,ls){
+  const checked=!!(ls.checked&&ls.checked[i]), chosen=ls.choices[i];
+  const card=h("div",{class:"q"+(checked?(chosen===qq.correct?" done-ok":" done-no"):""),id:"q"+i});
+  card.appendChild(h("div",{class:"qn"},"CÂU "+(i+1)));
+  card.appendChild(h("div",{class:"qt"},qq.q));
+  const optEls=[];
+  qq.options.forEach((opt,oi)=>{
+    let cls="opt";
+    if(checked){ cls+=" locked"; if(oi===qq.correct) cls+=" correct"; else if(oi===chosen) cls+=" wrong"; }
+    else if(chosen===oi) cls+=" selected";
+    const row=h("div",{class:cls}, h("div",{class:"mk"}, checked&&oi===qq.correct?"✓":(checked&&oi===chosen?"✗":LETTER[oi])), h("div",{class:"ot"},opt));
+    if(!checked) row.addEventListener("click",()=>{ ls.choices[i]=oi; saveState(); optEls.forEach((r,ri)=>{ r.className="opt"+(ri===oi?" selected":""); }); });
+    optEls.push(row); card.appendChild(row);
+  });
+  const expl=h("div",{class:"expl"+(checked?" show":"")}, h("b",{},"Giải thích: "), qq.explanation);
+  card.appendChild(expl);
+  const checkBtn=h("button",{class:"btn ghost sm"}, checked?"✓ Đã kiểm tra":"Kiểm tra");
+  if(checked) checkBtn.disabled=true; else checkBtn.addEventListener("click",()=>{
+    if(ls.choices[i]==null){ checkBtn.textContent="⚠ Chọn một đáp án"; setTimeout(()=>checkBtn.textContent="Kiểm tra",1400); return; }
+    ls.checked[i]=true; saveState(); const ch=ls.choices[i];
+    optEls.forEach((r,ri)=>{ let c="opt locked"; if(ri===qq.correct) c+=" correct"; else if(ri===ch) c+=" wrong"; r.className=c; r.firstChild.textContent=ri===qq.correct?"✓":(ri===ch?"✗":LETTER[ri]); });
+    expl.classList.add("show"); card.className="q "+(ch===qq.correct?"done-ok":"done-no");
+    checkBtn.textContent="✓ Đã kiểm tra"; checkBtn.disabled=true; updateScoreBar(lv.id);
+  });
+  card.appendChild(h("div",{class:"qbar"}, checkBtn));
+  return card;
+}
+
+/* ============================== ACTIONS ============================== */
+function assess(id){
+  const lv=LEVELS.find(l=>l.id===id), ls=levelState(id);
+  const res=document.getElementById("result");
+  const ckRated=Object.keys(ls.checklist).length, qAns=Object.keys(ls.choices).length;
+  if(ckRated<lv.checklist.length || qAns<lv.quiz.length){
+    res.className="result warn show"; res.innerHTML="";
+    res.appendChild(h("h3",{},"⚠ Chưa hoàn tất"));
+    res.appendChild(h("p",{},"Hãy tự đánh giá đủ "+lv.checklist.length+" mục checklist ("+ckRated+" đã làm) và chọn đủ "+lv.quiz.length+" câu test ("+qAns+" đã làm)."));
+    res.scrollIntoView({behavior:"smooth",block:"center"}); return;
+  }
+  for(let i=0;i<lv.quiz.length;i++) ls.checked[i]=true;
+  const ckOK=ckPct(id)>=CK_PASS, qzOK=qzCorrect(id)>=qzNeed(id), passed=ckOK&&qzOK;
+  ls.passed=passed;
+  if(passed) state.unlockedLevel=Math.max(state.unlockedLevel, Math.min(id+1, LEVELS.length));
+  if(!passed) forceKnowledgeOpen=true;
+  saveState(); render();
+  showResult(id,ckOK,qzOK,passed);
+}
+function showResult(id,ckOK,qzOK,passed){
+  const lv=LEVELS.find(l=>l.id===id), res=document.getElementById("result"); if(!res) return; res.innerHTML="";
+  const ckp=Math.round(ckPct(id)*100);
+  if(passed){
+    res.className="result ok show";
+    res.appendChild(h("h3",{},"🎉 Đạt "+lv.code+" "+lv.name+" (trong tool)"));
+    res.appendChild(h("ul",{},
+      h("li",{},"Checklist Thành thạo: "+ckp+"% ✓"),
+      h("li",{},"Knowledge Test: "+qzCorrect(id)+"/"+lv.quiz.length+" ✓")));
+    res.appendChild(h("p",{},"Để được công nhận CHÍNH THỨC còn cần: Practical Project (50%) + Peer & Mentor Review (30%)"+(lv.contribution.indexOf("BẮT BUỘC")>=0?" + Contribution bắt buộc của cấp này":"")+" — do Leader/Mentor verify."));
+  }else{
+    res.className="result no show";
+    res.appendChild(h("h3",{},"Chưa đạt "+lv.code));
+    res.appendChild(h("ul",{},
+      h("li",{},"Checklist Thành thạo: "+ckp+"% "+(ckOK?"✓":"(cần ≥"+Math.round(CK_PASS*100)+"%)")),
+      h("li",{},"Knowledge Test: "+qzCorrect(id)+"/"+lv.quiz.length+" "+(qzOK?"✓":"(cần ≥"+qzNeed(id)+")"))));
+    res.appendChild(h("p",{},"Mở phần “Kiến thức · Khoá học” ở trên để xem cần học/làm gì cho các mục còn thiếu."));
+  }
+  const acts=h("div",{class:"acts"});
+  if(passed && id<LEVELS.length) acts.appendChild(h("button",{class:"btn",onclick:()=>{currentLevelId=id+1;forceKnowledgeOpen=false;render();}},"→ Sang "+LEVELS[id].code));
+  if(!passed) acts.appendChild(h("button",{class:"btn",onclick:()=>{const d=document.querySelector("details.know"); if(d){d.open=true; d.scrollIntoView({behavior:"smooth",block:"start"});}}},"📚 Tới phần kiến thức"));
+  acts.appendChild(h("button",{class:"btn ghost",onclick:()=>{currentLevelId=null;render();}},"Về lộ trình"));
+  res.appendChild(acts); res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function promptLeader(){ const p=prompt("Nhập PIN Leader/Manager:"); if(p==null) return; if(p===LEADER_PIN){ state.leader=true; saveState(); render(); } else alert("Sai PIN."); }
+function exitLeader(){ state.leader=false; saveState(); render(); }
+function leaderPass(id){ const ls=levelState(id); ls.passed=true; state.unlockedLevel=Math.max(state.unlockedLevel, Math.min(id+1, LEVELS.length)); saveState(); currentLevelId=id<LEVELS.length?id+1:null; forceKnowledgeOpen=false; render(); }
+function resetProgress(){ if(!confirm("Xoá toàn bộ tiến độ, checklist và đáp án đã lưu? (Leader mode cũng tắt). Không hoàn tác.")) return; state=defaultState(); saveState(); currentLevelId=null; forceKnowledgeOpen=false; render(); }
+
+/* ============================== INIT ============================== */
+render();
+</script>
+</body>
+</html>
