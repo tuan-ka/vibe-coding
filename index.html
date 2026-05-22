@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đánh giá năng lực AI & Vibe Coding — 5 Level</title>
+<style>
+  :root{
+    --bg:#0f1320; --bg2:#161c2e; --card:#1c2438; --card2:#222c44;
+    --line:#2c3650; --txt:#e7ecf6; --muted:#9aa6c2; --accent:#6c8cff;
+    --accent2:#54e0c7; --good:#3ddc97; --bad:#ff6b81; --warn:#ffcc66;
+    --lock:#4a5572; --code:#0c1020; --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:linear-gradient(180deg,#0d1018,#0f1320 40%,#10131d);color:var(--txt);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+    line-height:1.6;min-height:100vh;}
+  .wrap{max-width:920px;margin:0 auto;padding:18px 18px 90px}
+  header.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:14px 0 18px;border-bottom:1px solid var(--line);margin-bottom:22px;}
+  header.bar h1{font-size:18px;margin:0}
+  header.bar .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .spacer{flex:1}
+  .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:6px 12px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+  .pill b{color:var(--accent2)}
+  button{font-family:inherit;cursor:pointer}
+  .btn{background:var(--accent);color:#0b1020;border:none;border-radius:10px;
+    padding:10px 16px;font-weight:700;font-size:14px;transition:.15s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--accent)}
+  .btn.sm{padding:7px 12px;font-size:13px}
+  .btn.warn{background:var(--warn);color:#3a2c00}
+  .btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+  .intro{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:24px}
+  .intro h2{margin:0 0 8px;font-size:16px}
+  .intro p{margin:6px 0;color:var(--muted);font-size:14px}
+  .intro .rules{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .tag{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12.5px;color:var(--muted)}
+  /* roadmap */
+  .roadmap{display:flex;flex-direction:column;gap:14px}
+  .lvl{display:flex;gap:16px;align-items:stretch;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);padding:16px 18px;transition:.15s;overflow:hidden}
+  .lvl.open{cursor:pointer}
+  .lvl.open:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .lvl.locked{opacity:.55;filter:grayscale(.3)}
+  .lvl.passed{border-color:var(--good)}
+  .lvl .num{flex:0 0 52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:22px;background:linear-gradient(135deg,var(--accent),#8a6cff);color:#0b1020}
+  .lvl.locked .num{background:var(--lock);color:#cdd6ee}
+  .lvl.passed .num{background:linear-gradient(135deg,var(--good),var(--accent2));}
+  .lvl .body{flex:1;min-width:0}
+  .lvl .t{font-weight:700;font-size:16px}
+  .lvl .te{color:var(--muted);font-weight:500;font-size:13px;font-style:italic}
+  .lvl .d{color:var(--muted);font-size:13px;margin-top:6px}
+  .lvl .meta{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .badge{font-size:12px;padding:3px 9px;border-radius:999px;font-weight:700}
+  .badge.lock{background:#2a3147;color:#aab4d0}
+  .badge.pass{background:rgba(61,220,151,.16);color:var(--good)}
+  .badge.todo{background:rgba(108,140,255,.16);color:var(--accent)}
+  .badge.partial{background:rgba(255,204,102,.16);color:var(--warn)}
+  .badge.teacher{background:rgba(255,204,102,.18);color:var(--warn)}
+  /* level page */
+  .back{color:var(--muted);background:none;border:none;font-size:14px;padding:6px 0;margin-bottom:6px}
+  .back:hover{color:var(--accent)}
+  .lvl-head{display:flex;gap:16px;align-items:center;margin:6px 0 18px}
+  .lvl-head .num{flex:0 0 56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:24px;background:linear-gradient(135deg,var(--accent),#8a6cff);color:#0b1020}
+  .lvl-head h2{margin:0;font-size:20px}
+  .lvl-head .te{color:var(--muted);font-style:italic;font-size:14px}
+  .section-label{display:flex;align-items:center;gap:8px;font-size:13px;text-transform:uppercase;
+    letter-spacing:1px;color:var(--muted);margin:24px 0 12px}
+  .section-label::after{content:"";flex:1;height:1px;background:var(--line)}
+  /* teacher bar */
+  .teacher-bar{background:rgba(255,204,102,.1);border:1px solid var(--warn);border-radius:12px;
+    padding:10px 14px;margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .teacher-bar .lab{font-size:13px;color:var(--warn);font-weight:700}
+  .jump{display:flex;gap:6px;flex-wrap:wrap}
+  .jb{border:1px solid var(--line);background:var(--card);color:var(--txt);border-radius:8px;padding:5px 11px;font-size:13px;font-weight:700}
+  .jb:hover{border-color:var(--warn)}
+  .jb.cur{background:var(--warn);color:#3a2c00;border-color:var(--warn)}
+  /* knowledge */
+  details.know{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+  details.know[open]{border-color:var(--accent2)}
+  details.know.flash{animation:flash 1.4s ease}
+  @keyframes flash{0%,100%{box-shadow:0 0 0 0 rgba(84,224,199,0)}40%{box-shadow:0 0 0 4px rgba(84,224,199,.35)}}
+  details.know>summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:700;display:flex;align-items:center;gap:10px;font-size:15px}
+  details.know>summary::-webkit-details-marker{display:none}
+  details.know>summary .chev{transition:.2s;color:var(--accent2)}
+  details.know[open]>summary .chev{transform:rotate(90deg)}
+  .know-inner{padding:0 18px 16px}
+  .lesson{border-top:1px solid var(--line);padding:14px 0}
+  .lesson:first-child{border-top:none}
+  .lesson h4{margin:0 0 6px;font-size:14.5px;color:var(--txt)}
+  .lesson p{margin:0;color:var(--muted);font-size:13.5px;white-space:pre-line}
+  .ex-cap{margin-top:10px;font-size:12px;color:var(--accent2);font-weight:700}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow:auto;margin:6px 0 0}
+  pre code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;color:#cfe0ff;white-space:pre}
+  /* questions */
+  .q{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+  .q.done-ok{border-color:rgba(61,220,151,.5)}
+  .q.done-no{border-color:rgba(255,107,129,.5)}
+  .q .qn{font-size:12px;color:var(--accent);font-weight:800;letter-spacing:.5px}
+  .q .qt{font-size:14.5px;margin:6px 0 12px;white-space:pre-line;font-weight:600}
+  .opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;
+    padding:10px 12px;margin:7px 0;cursor:pointer;transition:.12s;background:var(--code)}
+  .opt:hover{border-color:var(--accent)}
+  .opt.selected{border-color:var(--accent);background:rgba(108,140,255,.12)}
+  .opt.correct{border-color:var(--good);background:rgba(61,220,151,.14)}
+  .opt.wrong{border-color:var(--bad);background:rgba(255,107,129,.12)}
+  .opt.locked{cursor:default}
+  .opt .mk{flex:0 0 22px;height:22px;border-radius:6px;background:var(--card2);display:flex;
+    align-items:center;justify-content:center;font-weight:800;font-size:12px;color:var(--muted)}
+  .opt.selected .mk{background:var(--accent);color:#0b1020}
+  .opt.correct .mk{background:var(--good);color:#06281b}
+  .opt.wrong .mk{background:var(--bad);color:#3a0410}
+  .opt .ot{flex:1;font-size:13.5px}
+  .expl{margin-top:10px;border-left:3px solid var(--accent2);padding:9px 12px;background:var(--bg2);
+    border-radius:0 8px 8px 0;font-size:13px;color:#dbe4f7;white-space:pre-line;display:none}
+  .expl.show{display:block}
+  .expl b{color:var(--accent2)}
+  .reason{margin-top:11px}
+  .reason label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+  textarea{width:100%;min-height:60px;background:var(--code);color:var(--txt);border:1px solid var(--line);
+    border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;resize:vertical}
+  textarea:focus{outline:none;border-color:var(--accent)}
+  .qbar{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+  /* footer */
+  .scorebar{position:sticky;bottom:0;background:rgba(16,20,32,.92);backdrop-filter:blur(8px);
+    border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;margin-top:20px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .scorebar .stat{font-size:14px}
+  .scorebar .stat b{font-size:18px;color:var(--accent2)}
+  .result{border-radius:var(--r);padding:16px 18px;margin-top:16px;font-size:14px;display:none}
+  .result.show{display:block}
+  .result.ok{background:rgba(61,220,151,.12);border:1px solid var(--good)}
+  .result.no{background:rgba(255,107,129,.1);border:1px solid var(--bad)}
+  .result.warn{background:rgba(255,204,102,.1);border:1px solid var(--warn)}
+  .result h3{margin:0 0 6px}
+  .result.ok h3{color:var(--good)} .result.no h3{color:var(--bad)} .result.warn h3{color:var(--warn)}
+  .result .acts{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+  @media(max-width:560px){.lvl .num{flex-basis:44px;height:44px;font-size:18px}header.bar h1{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="wrap"><div id="app"></div></div>
+
+<script>
+/* ====== PIN giáo viên — ĐỔI tại đây ====== */
+const TEACHER_PIN = "2026";
+
+/* ============================== DATA ============================== */
+const LEVELS = [
+  /* ---------------- LEVEL 1 ---------------- */
+  {
+    id:1, titleVi:"Nền tảng AI & tư duy Vibe Coding", titleEn:"Foundation",
+    intro:"Hiểu đúng vibe coding là gì, vai trò của bạn trong vòng lặp với AI, cách prompt và giới hạn của AI.",
+    knowledge:[
+      {heading:"1. Vibe coding là gì — và KHÔNG phải là gì",
+       body:"Vibe coding (Karpathy, 2025) là pattern hợp tác HAI CHIỀU: con người dẫn dắt ý định + phản biện, AI sinh diff / gọi tool / chạy lệnh.\n\n• Bản chất: bạn chuyển từ \"người gõ code\" sang \"người điều khiển agent viết code\" (orchestrator).\n• Hiểu lầm phổ biến: \"AI viết hết, mình khỏi đọc\". Đó chỉ chấp nhận được cho prototype / throwaway. Trong dự án thật, vibe coding chuyên nghiệp = agent-assisted engineering CÓ GIÁM SÁT: đọc từng diff, chạy test, tự sign-off commit.\n• Cập nhật 2025–2026: chính Karpathy nói vibe coding \"thuần\" đã lỗi thời; chuẩn mới là dùng agent như workflow mặc định NHƯNG nhiều giám sát hơn.",
+       example:{cap:"Vòng lặp Vibe Coding (See → Say → Run → Copy-paste)", code:
+"See        -> quan sat output / loi / UI hien tai\nSay        -> mo ta y dinh moi (\"them dark mode\")\nRun        -> chay thu, xem ket qua\nCopy-paste -> dua loi/ket qua nguoc lai cho AI\n(lap lai — ban la ORCHESTRATOR, khong phai nguoi go code)"}},
+      {heading:"2. Ba vai trò bạn luân phiên đảm nhận",
+       body:"Khi vibe coding bạn KHÔNG chỉ nhận output rồi paste. Bạn liên tục đổi giữa 3 vai trò — mỗi vai một kiểu tư duy:\n• Architect: đặc tả CÁI GÌ & VÌ SAO, chia bài toán thành các bước AI làm được.\n• Reviewer: đọc diff AI đề xuất, kiểm logic, đối chiếu convention, bắt lỗi TRƯỚC khi accept.\n• Integrator: nối code đã accept vào codebase, chạy test, xử lý conflict & lỗi tích hợp.\nMột commit thường đi qua cả ba vai nhiều lần.",
+       example:{cap:"Ai làm gì", code:
+"Architect  : \"Them JWT auth cho /login, exp 1h, co refresh token\"\nReviewer   : doc diff -> 'thieu test cho token het han' -> reject\nIntegrator : chay pytest, sua import, resolve conflict, commit"}},
+      {heading:"3. Prompt tốt = Context + Ràng buộc + Tiêu chí",
+       body:"Prompt mơ hồ → AI phải đoán → diff lệch. Một prompt tốt nêu rõ:\n• Context: file/đoạn nào (@file), tình huống, triệu chứng.\n• Ràng buộc: ngôn ngữ/framework, không dùng gì, convention.\n• Tiêu chí hoàn thành: hành vi mong đợi + yêu cầu test.\nMẹo: nếu bạn không mô tả được rõ ràng cho AI thì thường chính bạn cũng chưa hiểu rõ bài toán.",
+       example:{cap:"So sánh prompt", code:
+"[TE]  \"viet ham login\"  /  \"sua cai bug kia di\"\n\n[TOT] \"Trong @auth.py, login(email, password) cho FastAPI:\n       - verify bang bcrypt\n       - tra JWT (HS256, exp 1h)\n       - sai pass -> raise HTTPException(401)\n       - type hints + docstring + them test\""}},
+      {heading:"4. Hallucination & giới hạn — luôn verify",
+       body:"AI có thể: bịa API/tham số không tồn tại, dùng thư viện lỗi thời, sai nhưng vẫn tự tin, hoặc bỏ qua edge case.\nNguyên tắc:\n• Không paste mù — đọc diff, chạy test, đối chiếu docs.\n• Verify khi nghi ngờ (tham số lạ, lib lạ).\n• Biết khi nào KHÔNG dùng AI: thuật toán đặc thù, tối ưu hiệu năng sâu, logic bảo mật lõi — nơi cost của một bug rất cao."}
+    ],
+    questions:[
+      {q:"Đồng nghiệp nói: \"Vibe coding nghĩa là để AI viết hết, mình khỏi cần đọc code\". Phát biểu nào ĐÚNG nhất?",
+       options:[
+        "Đúng — mục tiêu của vibe coding là loại bỏ việc con người đọc code.",
+        "Vibe coding là vòng lặp hai chiều; dev vẫn đọc diff, chạy test và chịu trách nhiệm cho commit.",
+        "Vibe coding chỉ là tên gọi khác của autocomplete như Copilot.",
+        "Vibe coding cấm dev tự viết code trong mọi trường hợp."],
+       correct:1,
+       explanation:"Vibe coding là hợp tác 2 chiều: người dẫn dắt + giám sát, AI thực thi. 'Viết hết, không đọc' chỉ hợp prototype. (A) sai vì vẫn phải review; (C) sai vì Copilot là autocomplete cấp token còn vibe coding là agent loop cấp task; (D) sai vì vẫn nên tự code phần đặc thù."},
+      {q:"Thứ tự đúng của vòng lặp vibe coding (Karpathy) là gì?",
+       options:["Say → See → Run → Copy-paste","See → Say → Run → Copy-paste","Run → See → Copy-paste → Say","See → Run → Say → Copy-paste"],
+       correct:1,
+       explanation:"See (quan sát output/lỗi) → Say (mô tả ý định) → Run (chạy thử) → Copy-paste (đưa lỗi lại cho AI), lặp lại. Bạn giữ vai orchestrator của vòng lặp."},
+      {q:"Trường hợp nào NÊN tự viết thay vì để AI sinh?",
+       options:["Sinh CRUD/boilerplate lặp khuôn.","Viết test đơn giản cho hàm thuần.","Thuật toán tối ưu hiệu năng đặc thù hoặc logic bảo mật lõi.","Refactor đổi tên biến hàng loạt."],
+       correct:2,
+       explanation:"AI mạnh ở routine/boilerplate/refactor (A, B, D). Phần thuật toán đặc thù, optimize sâu, bảo mật lõi — cost của bug cao — nên tự kiểm soát."},
+      {q:"AI đề xuất gọi pandas.read_excel(path, engine='auto'). Bạn nên làm gì?",
+       options:["Tin và dùng ngay vì AI hiếm khi sai.","Đối chiếu docs / chạy thử để verify — đây có thể là hallucination.","Bỏ pandas, tự viết parser Excel bằng tay.","Báo lỗi cho đội phát triển pandas."],
+       correct:1,
+       explanation:"AI có thể bịa tham số không tồn tại (hallucination). Luôn verify bằng docs/chạy thử, không paste mù. (A) nguy hiểm; (C)(D) phản ứng thái quá."},
+      {q:"Prompt nào TỐT nhất để nhờ AI sửa bug?",
+       options:["\"Sửa cái bug kia đi.\"","\"Code lỗi, fix giúp.\"","\"Trong @auth.py, login() trả 500 khi password rỗng thay vì 400 — sửa để raise HTTPException(400) và thêm test.\"","\"Làm cho login chạy đúng.\""],
+       correct:2,
+       explanation:"Prompt tốt = file + triệu chứng + kỳ vọng + tiêu chí (test). Các phương án còn lại mơ hồ, buộc AI phải đoán → dễ lệch."},
+      {q:"Vai trò \"Reviewer\" trong vibe coding chịu trách nhiệm chính gì?",
+       options:["Nối code vào codebase và chạy test tích hợp.","Đọc diff AI đề xuất, kiểm logic & convention, bắt lỗi trước khi accept.","Đặc tả yêu cầu và chia nhỏ bài toán cho AI.","Tự viết toàn bộ code thay cho AI."],
+       correct:1,
+       explanation:"(A) là Integrator, (C) là Architect. Reviewer tập trung CHẤT LƯỢNG của diff trước khi chấp nhận."}
+    ]
+  },
+
+  /* ---------------- LEVEL 2 ---------------- */
+  {
+    id:2, titleVi:"Quy trình làm việc với AI (E→P→C→C)", titleEn:"Workflow",
+    intro:"Quy trình chuẩn cho mỗi commit cycle, Plan Mode, project conventions, và review diff như review PR.",
+    knowledge:[
+      {heading:"1. Workflow E→P→C→C — khung cho mọi commit",
+       body:"Bốn phase chuẩn, áp dụng từ bug fix nhỏ đến refactor đa file:\n• Explore: đọc file, grep, hiểu hiện trạng — entry point ở đâu, convention gì, giả định ngầm nào. Mục tiêu là bức tranh chính xác TRƯỚC khi sửa.\n• Plan: cân nhắc trade-off & risk, liệt kê files sẽ sửa + test cần thêm.\n• Code: AI sinh diff, bạn review TỪNG hunk, chạy test, iterate.\n• Commit: final review + commit message + tự nhấn commit.\nSkip phase nào cũng để lại lỗ hổng: thiếu Explore → đụng tài nguyên/test sẵn có; thiếu Plan → code lan man.",
+       example:{cap:"Prompt mẫu Explore & Plan", code:
+"# Explore\n\"Tim moi file import 'requests', tom tat 1 cau moi file.\n Liet ke entry point (if __name__ == '__main__').\"\n\n# Plan (trong Plan Mode)\n\"De xuat plan them JWT auth cho /login. PLAN ONLY, no code.\n Liet ke: files se sua, test can them, 1 trade-off.\""}},
+      {heading:"2. Plan Mode & ba chế độ permission",
+       body:"Claude Code có 3 chế độ, đổi bằng Shift+Tab:\n• Approval (mặc định): hỏi trước mỗi edit — an toàn, hợp repo lạ / task rủi ro.\n• Auto-Accept: tự áp dụng edit — chỉ dùng khi đã làm cùng tính năng và tin AI hiểu đúng.\n• Plan Mode (Shift+Tab ×2): AI bị CẤM sửa file, chỉ đề xuất plan dạng text → bạn duyệt trước khi code. Đây là rào chắn để thực sự dừng lại suy nghĩ.\n(Cursor/Copilot: hỏi plan trong chat trước khi cho sửa.) Quy tắc thực dụng: mặc định Approval; lên Auto-Accept khi đã tin; xuống Plan Mode khi không chắc phạm vi.",
+       example:{cap:"Thang trade-off tốc độ ↔ kiểm soát", code:
+"Plan Mode   : KHONG sua, chi de xuat   (an toan nhat)\nApproval    : hoi truoc moi edit\nAuto-Accept : tu ap dung, khong hoi     (nhanh nhat, rui ro)"}},
+      {heading:"3. Project memory & conventions (CLAUDE.md / rules)",
+       body:"Để AI hiểu convention mà không phải nhắc lại mỗi session, đặt rule vào file: CLAUDE.md (Claude Code) / .cursorrules (Cursor) / .github/copilot-instructions.md (Copilot).\nClaude Code có 3 cấp, load chồng từ rộng đến hẹp (cấp hẹp ghi đè cấp rộng):\n• Global ~/.claude/CLAUDE.md — sở thích cá nhân mọi project.\n• Project ./CLAUDE.md — convention team (COMMIT vào git).\n• Personal ./CLAUDE.local.md — note cá nhân/secret reference (GITIGNORE).\nĐầu tư viết file này kỹ sẽ tiết kiệm hàng giờ sửa diff lệch convention.",
+       example:{cap:"CLAUDE.md / .cursorrules tối thiểu", code:
+"# Convention du an\n## Stack\n- Python 3.11, FastAPI, pytest. Khong async tru khi can.\n## Style\n- Type hints moi public function. Docstring Google style.\n- Khong print() trong logic — dung logging.\n## Test\n- pytest tests/ ; mock network, khong goi that.\n## Policy\n- Moi tinh nang >1 file -> BAT BUOC Plan truoc."}},
+      {heading:"4. Review diff như review PR + Commit là checkpoint của người",
+       body:"Ở phase Code bạn là code reviewer chuyên nghiệp — nhiệm vụ là PHÁT HIỆN SAI SÓT, không phải tạo logic. Mỗi hunk hỏi: logic đúng mục tiêu? khớp convention/CLAUDE.md? thêm dependency lạ? có test cho hành vi mới? còn print()/secret không? Accept TỪNG hunk, không all-or-nothing.\nCommit: dùng conventional commit (feat/fix/refactor/docs/test). KHÔNG để AI auto-commit — git commit luôn là điểm con người xác nhận, để dễ rollback và không lọt bug/secret.",
+       example:{cap:"Checklist review diff + commit", code:
+"[ ] Logic dung muc tieu?\n[ ] Khop CLAUDE.md / convention?\n[ ] Co them dependency moi khong can?\n[ ] Co test cho hanh vi moi?\n[ ] Khong con print()/console.log/secret hardcode?\n--> commit: feat(auth): add JWT to /login"}}
+    ],
+    questions:[
+      {q:"Thứ tự đúng của workflow E→P→C→C là?",
+       options:["Explore → Plan → Code → Commit","Plan → Explore → Code → Commit","Code → Plan → Explore → Commit","Explore → Code → Plan → Commit"],
+       correct:0,
+       explanation:"Explore (hiểu hiện trạng) → Plan (kế hoạch & risk) → Code (sinh diff, review từng hunk) → Commit (sign-off). Đây là một commit cycle hoàn chỉnh."},
+      {q:"Bỏ qua phase Explore thường dẫn đến hậu quả gì nhất?",
+       options:["Commit message xấu.","AI trùng lặp code, phá test hoặc vi phạm convention sẵn có.","Context window đầy nhanh hơn.","Không vào được Plan Mode."],
+       correct:1,
+       explanation:"Không Explore → AI không biết tài nguyên & convention hiện có → đụng độ với code/test sẵn có. Đây chính là anti-pattern của Explore."},
+      {q:"Plan Mode (Shift+Tab ×2) trong Claude Code có tác dụng gì?",
+       options:["Tự động commit sau mỗi edit.","Cho AI quyền sửa file nhanh hơn.","Cấm AI sửa file, chỉ đề xuất plan dạng text để bạn duyệt trước.","Xoá context để tiết kiệm token."],
+       correct:2,
+       explanation:"Plan Mode là read-only — rào chắn buộc đọc plan trước khi code. (B) là Auto-Accept; (D) là /clear; auto-commit thì không tồn tại."},
+      {q:"Trong hệ thống CLAUDE.md ba cấp, file nào KHÔNG nên commit vào git?",
+       options:["./CLAUDE.md (Project)","~/.claude/CLAUDE.md (Global)","./CLAUDE.local.md (Personal)",".github/copilot-instructions.md"],
+       correct:2,
+       explanation:"CLAUDE.local.md chứa note cá nhân / tham chiếu secret → phải gitignore. Project CLAUDE.md và copilot-instructions nên commit để cả team dùng chung."},
+      {q:"AI sinh diff dùng `var` và thêm thư viện moment.js (đã deprecated). Cách xử lý đúng?",
+       options:["Accept rồi sửa sau khi đã merge.","Reject hunk, yêu cầu const/let + thay moment; ghi rule vào CLAUDE.md để chặn tái diễn.","Tắt review cho đỡ phiền.","Đổi sang một AI khác."],
+       correct:1,
+       explanation:"Bắt ngay ở phase Code (vai Reviewer): reject + yêu cầu sửa, đồng thời ghi convention để lần sau AI không lặp lại lỗi."},
+      {q:"Vì sao KHÔNG nên để AI auto-commit mọi thay đổi?",
+       options:["Vì git không hỗ trợ AI commit.","Vì commit là checkpoint của con người; auto-commit dễ lọt bug/secret, khó rollback, mất kiểm soát.","Vì sẽ tốn nhiều token hơn.","Vì AI không biết viết commit message."],
+       correct:1,
+       explanation:"Pattern thiết kế giữ git commit là điểm con người xác nhận. Auto-commit → rủi ro lọt lỗi/secret và khó rollback."}
+    ]
+  },
+
+  /* ---------------- LEVEL 3 ---------------- */
+  {
+    id:3, titleVi:"Mở rộng & tuỳ biến AI (Skill, Subagent, Slash, Hook, MCP)", titleEn:"Extend & Customize",
+    intro:"Biết DÙNG và TUỲ BIẾN 5 cơ chế mở rộng: tạo & sửa được Skill, Subagent, Slash command, Hook, và dùng MCP server có sẵn.",
+    knowledge:[
+      {heading:"1. Chọn cơ chế nào? (bức tranh tổng)",
+       body:"Năm cơ chế mở rộng KHÔNG thay thế nhau — mỗi cái tối ưu cho một loại nhu cầu. Nhớ cây quyết định này là chọn đúng 80% trường hợp.\n• Cần tool hệ thống ngoài (DB, search API, microservice) → MCP.\n• Cần review/đánh giá với góc nhìn mới, context riêng → Subagent.\n• Cần phản ứng theo sự kiện (sau khi save/edit, lúc mở session) → Hook.\n• Cần một prompt dài hay lặp, gọi chủ động → Slash command.\n• Cần workflow N-bước tự kích hoạt theo ngữ cảnh → Skill.",
+       example:{cap:"Cây chọn nhanh", code:
+"Can tool he thong ngoai (DB, API)      -> MCP\nCan review goc nhin moi, context rieng -> Subagent\nCan phan ung theo su kien (save/edit)  -> Hook\nCan macro prompt go tay lai            -> Slash command\nCan workflow N-buoc tu kich hoat       -> Skill"}},
+      {heading:"2. Skill — workflow tự kích hoạt (auto-trigger)",
+       body:"Skill là folder .claude/skills/<name>/SKILL.md (Markdown + YAML frontmatter). Điểm đặc biệt: AI TỰ load khi 'description' khớp với prompt của bạn — KHÔNG cần gõ tên.\nCÁCH DÙNG: mô tả vấn đề tự nhiên (vd 'agent loop bị stuck') → Claude khớp description → chèn workflow vào prompt → làm theo.\nCÁCH CUSTOM: sửa 'description' để đổi điều kiện trigger (thêm/bớt từ khoá); sửa phần thân Markdown để đổi các bước. Hợp nhất cho: workflow lặp lại có N bước cố định (review pattern, debug checklist, deploy checklist).",
+       example:{cap:".claude/skills/react-loop-debug/SKILL.md", code:
+"---\nname: react-loop-debug\ndescription: Debug ReAct agent loop khi gap infinite loop,\n  agent stuck, iteration limit exceeded, hoac tool call errors.\nallowed-tools: [Read, Edit, Bash]\n---\n# ReAct Loop Debug Workflow\n## Pattern 1: Infinite loop\nCheck: grep -n \"messages.append\" agent.py\nFix: append assistant message sau moi LLM response.\n## Pattern 2: tool_call_id mismatch (HTTP 400)\nFix: dung call.id tu response, khong tu dat UUID.\n# << doi 'description' o tren -> doi tu khoa kich hoat >>"}},
+      {heading:"3. Subagent — agent con có context RIÊNG",
+       body:"Subagent là .claude/agents/<name>.md (frontmatter name/description/tools + system prompt). Nó chạy với context window RIÊNG (không làm phình main session) và chỉ trả về một summary ngắn — giống nhờ đồng nghiệp review: đưa phạm vi nhỏ, họ làm độc lập, trả kết quả gọn.\nVì sao dùng cho review code: (1) context isolation — góc nhìn mới, không bias 'code này tôi viết chắc đúng'; (2) tool restriction — giới hạn read-only an toàn; (3) concise output — không pollute context chính.\nCÁCH CUSTOM: đổi 'tools:' để cho/không cho sửa file; sửa checklist trong system prompt.",
+       example:{cap:".claude/agents/agent-reviewer.md", code:
+"---\nname: agent-reviewer\ndescription: Review code agent. Use khi user nhac \"review\"\n  hoac truoc commit.\ntools: [Read, Grep, Bash]   # KHONG co Edit -> read-only\n---\nYou are a senior Python reviewer.\n## Checklist\n1. Khong dung eval/exec (whitelist ast)\n2. ReAct loop co MAX_ITERATIONS\n3. Type hints + docstring day du\n## Output: + good / ~ suggestion / - must fix  (<=400 words)"}},
+      {heading:"4. Slash command & Hook",
+       body:"• Slash command: .claude/commands/<name>.md chứa một prompt template; gọi bằng /<name> trong REPL. Là 'bookmark' cho prompt hay lặp — bạn CHỦ ĐỘNG gọi. Vd /review-pr, /seed-tests.\n• Hook: cấu hình trong ~/.claude.json mục 'hooks'; chạy một shell command theo SỰ KIỆN (PreEdit / PostEdit / SessionStart). Dùng tự động hoá side-effect: format sau khi save, log diff vào audit, chạy test trước commit. Lưu ý: hook fail (vd format lỗi) có thể CHẶN flow → cân nhắc.",
+       example:{cap:"review-pr.md (slash) + hook config (~/.claude.json)", code:
+".claude/commands/review-pr.md:\n  Review staged changes against:\n  1. Type hints  2. Tests for new behavior\n  3. CLAUDE.md conventions  4. No print()/console.log\n  Report + / ~ / - per item.\n\n\"hooks\": { \"PostEdit\": [\n   { \"command\": \"black ${file}\", \"filter\": \"*.py\" } ] }"}},
+      {heading:"5. MCP — dùng tool ngoài (server có sẵn)",
+       body:"MCP (Model Context Protocol) là chuẩn JSON-RPC cho phép program ngoài (DB, search API, script) cung cấp tool cho Claude Code (HOST). Cài server có sẵn vào ~/.claude.json mục 'mcpServers'; gõ /mcp để xem server + tool đang connect. Từ phía LLM, tool MCP nhìn giống built-in tool.\nLƯU Ý CỰC QUAN TRỌNG (hay nhầm): MCP là cho Claude Code REPL. Code Python của BẠN (vd ReAct agent tự viết) thì gọi REST API trực tiếp bằng httpx — KHÔNG qua MCP, vì nó không phải Claude Code.",
+       example:{cap:"~/.claude.json — dùng MCP có sẵn", code:
+"\"mcpServers\": {\n  \"tavily-search\": {\n    \"command\": \"npx\",\n    \"args\": [\"-y\", \"tavily-mcp\"],\n    \"env\": { \"TAVILY_API_KEY\": \"tvly-...\" }\n  }\n}\n# Trong REPL:  /mcp  -> liet ke server + tool dang connect"}}
+    ],
+    questions:[
+      {q:"Team muốn: khi ai gõ \"review code\" thì AI chạy checklist của team bằng một reviewer có GÓC NHÌN ĐỘC LẬP, chỉ đọc không sửa. Dùng cơ chế nào?",
+       options:["Hook PostEdit","Slash command","Subagent với tools [Read, Grep, Bash]","MCP server"],
+       correct:2,
+       explanation:"Cần context riêng (không bias) + read-only → Subagent, giới hạn tools bỏ Edit. Hook phản ứng sự kiện, Slash phải gõ tay, MCP là gắn tool ngoài."},
+      {q:"Muốn khi user nói \"agent loop bị stuck\" thì AI TỰ nạp 4 bước debug của team (không cần gõ tên). Dùng gì?",
+       options:["Skill (auto-trigger theo description)","Slash command /debug","Hook SessionStart","Subagent"],
+       correct:0,
+       explanation:"Tự kích hoạt theo ngữ cảnh = Skill (SKILL.md, description chứa từ khoá). Slash phải gõ tên; Hook theo sự kiện hệ thống; Subagent là agent con cần được gọi."},
+      {q:"Muốn tự động chạy `black` format mỗi khi một file .py bị sửa. Cơ chế nào?",
+       options:["Skill","Hook PostEdit, filter *.py, command \"black ${file}\"","Subagent","MCP server"],
+       correct:1,
+       explanation:"Phản ứng theo sự kiện (sau edit) = Hook. Khai báo trong ~/.claude.json mục hooks với filter *.py."},
+      {q:"Khác biệt CHÍNH giữa Skill và Slash command là gì?",
+       options:["Skill phải gõ tên, Slash thì tự kích hoạt.","Skill tự kích hoạt khi description khớp prompt; Slash phải gõ /<name>.","Cả hai đều tự kích hoạt như nhau.","Slash có context riêng còn Skill thì không."],
+       correct:1,
+       explanation:"Skill = auto-trigger theo ngữ cảnh; Slash = macro chủ động gõ tay. (Context riêng là đặc trưng của Subagent.)"},
+      {q:"Bạn muốn dùng web search Tavily NGAY trong Claude Code REPL. Phương án đúng nhất?",
+       options:["Gọi httpx.post ngay trong REPL.","Cài Tavily MCP server vào ~/.claude.json; còn code Python của bạn thì mới gọi REST trực tiếp.","Viết một Skill để gọi internet.","Thêm một Hook gọi API."],
+       correct:1,
+       explanation:"MCP là cho Claude Code (host). Code Python (agent tự viết) mới gọi REST/httpx trực tiếp. Đây là điểm rất hay nhầm: MCP ≠ thư viện cho code Python."},
+      {q:"Vì sao subagent reviewer nên giới hạn tools [Read, Grep, Bash] (không Edit)?",
+       options:["Để chạy nhanh hơn.","Để nó KHÔNG thể tự sửa code khi đang review — bạn yên tâm khi delegate.","Vì subagent không hỗ trợ Edit.","Để tiết kiệm token."],
+       correct:1,
+       explanation:"Read-only đảm bảo reviewer chỉ nhận xét, không thay đổi code. Cùng với context isolation và concise output là 3 lý do dùng subagent cho review."}
+    ]
+  },
+
+  /* ---------------- LEVEL 4 ---------------- */
+  {
+    id:4, titleVi:"Context Engineering & chiến lược workflow", titleEn:"Optimizer",
+    intro:"Quản lý context window như tài nguyên hữu hạn, và chọn đúng workflow pattern theo tình huống.",
+    knowledge:[
+      {heading:"1. Context window là tài nguyên hữu hạn",
+       body:"Mọi tương tác đều tốn token: mỗi file Read, mỗi tool result, mỗi response đều cộng vào context window — bộ nhớ làm việc của LLM. Tuỳ model: ~200K (Claude 4.6) đến ~1M (4.7).\nĐây là tài nguyên hữu hạn ở hai nghĩa: token đã dùng không lấy lại trong cùng session, và input+output đều ăn chung budget. Khi context gần đầy: AI bắt đầu quên thông tin cũ, response chậm dần, và có thể fail.\nQuan trọng: context càng đầy thì thông tin càng LOÃNG → chất lượng lập kế hoạch & sửa file GIẢM.",
+       example:{cap:"Phân bổ token điển hình (cửa sổ 200K)", code:
+"System + tool schemas   ~5%\nCLAUDE.md (3 tiers)      ~3%\nFile reads              ~40%\nConversation history    ~40%\nOutput reservation      ~4%\nFree                    ~8%   (cang it free cang nguy hiem)"}},
+      {heading:"2. Đo & dọn context: /context, /status, /compact, /clear",
+       body:"Nguyên tắc: ĐO trước khi tối ưu.\n• /context — xem cái gì đang chiếm budget (thường là File reads).\n• /status — tổng quan phiên (đã dùng %, theo nhóm).\n• /compact — tóm tắt history thành digest, GIỮ N turn gần nhất. Dùng khi vẫn CÙNG task.\n• /clear — xoá toàn bộ history, làm lại từ đầu. Dùng khi PIVOT sang task mới hoàn toàn.\n• auto-compact (~95%) — hệ thống tự tóm tắt; để nó tự lo, đừng để chạm 100% (request fail/truncate).\nMục tiêu lý tưởng: giữ context dùng dưới ~20–30% để model hiểu ngữ cảnh tốt nhất.",
+       example:{cap:"Cây quyết định khi context cao", code:
+"Context > 80% ?\n  -> Khong: tiep tuc binh thuong\n  -> Co: con cung task khong?\n       -> Co  : /compact  (giu context, free ~40-50%)\n       -> Khong: /clear   (reset sach, free ~90%)\n  -> >95%: auto-compact tu xu ly\nMeo: so lo mat thong tin -> ghi key info vao CLAUDE.md TRUOC khi /compact"}},
+      {heading:"3. Ba cách giữ context thoáng",
+       body:"• Prompt cụ thể: tránh Read nguyên file lớn khi chỉ cần một function; chỉ nạp đúng cái cần.\n• Tắt MCP server không dùng: mỗi server đăng ký schema vào budget dù chưa gọi.\n• Đẩy exploration nặng sang Subagent: phần đọc/grep nhiều chạy trong context con, main session chỉ nhận summary ngắn.",
+       example:{cap:"Trước / sau khi tối ưu", code:
+"[Truoc] Read ca module 2000 dong -> chiem 8% context\n[Sau]  \"doc ham search() trong @engine.py\" -> chiem 0.5%\n\n[Truoc] 3 MCP server bat san -> +18K token schema\n[Sau]  tat 2 cai khong dung -> giai phong ~12K"}},
+      {heading:"4. Bốn workflow pattern — chọn theo 2 chiều",
+       body:"Không có pattern tốt nhất tuyệt đối. Chọn theo: độ RÕ của spec × độ PHỦ của test sẵn có. Một dự án dài thường chuyển qua lại giữa các pattern theo giai đoạn.\n• Iterative: spec mơ hồ + CÓ test → chu kỳ ngắn, đo bằng test mỗi vòng, commit nhỏ. (vd cải thiện module cũ)\n• TDD with AI: spec rõ + cần test cao → viết test trước (Red), AI implement (Green), refactor.\n• Plan-driven: spec mơ hồ + KHÔNG test + rủi ro cao → Plan Mode nhiều, đề xuất nhiều phương án, review kỹ. (vd refactor DB)\n• Spec-first: spec rõ + ít test → viết SPEC.md rồi AI sinh code + test từ đó.",
+       example:{cap:"Quadrant + cấu trúc SPEC.md", code:
+"               spec mo ho     spec ro\ntest cao  |  Iterative      TDD with AI\ntest thap |  Plan-driven    Spec-first\n\nSPEC.md: Goal / Inputs / Outputs / Edge cases /\n         Performance / Acceptance criteria\n-> criteria phai DO DUOC: 'p95 < 50ms cho 1000 phan tu'\n   (KHONG viet 'efficient' — khong test against duoc)"}}
+    ],
+    questions:[
+      {q:"/status báo context 85% và bạn vẫn đang làm CÙNG một task. Nên dùng lệnh nào?",
+       options:["/clear","/compact","/exit","Không làm gì, để chạm 100%"],
+       correct:1,
+       explanation:"Cùng task → /compact (tóm tắt history, giữ phần liên quan). /clear chỉ dùng khi chuyển task mới. Để chạm 100% thì request fail/truncate."},
+      {q:"Bạn chuyển sang một task HOÀN TOÀN MỚI, context đang cao. Nên?",
+       options:["/compact","/clear","Mở thêm tab khác","Tăng context window"],
+       correct:1,
+       explanation:"Task mới → /clear để bắt đầu sạch, tránh nhiễu từ ngữ cảnh task cũ."},
+      {q:"Vì sao nên giữ context dùng ở mức thấp (~20–30%)?",
+       options:["Tiết kiệm tiền là lý do duy nhất.","Context loãng → AI lập kế hoạch & sửa file kém chính xác, dễ bỏ sót.","Để model chạy nhanh gấp đôi.","Không quan trọng, càng nhiều context càng tốt."],
+       correct:1,
+       explanation:"Thông tin loãng làm giảm chất lượng suy luận và sửa file. Nên đo bằng /context, /status và dọn khi cần."},
+      {q:"Module cũ, task mô tả mơ hồ \"làm cho tốt hơn\", nhưng CÓ test suite chạy được. Pattern phù hợp?",
+       options:["Spec-first","Plan-driven","Iterative Refinement","Big-bang rewrite"],
+       correct:2,
+       explanation:"Spec mơ hồ + có test = Iterative: thay đổi nhỏ, đo bằng test mỗi vòng (pass rate/perf), commit nhỏ; dừng nếu 5 vòng không cải thiện."},
+      {q:"Xây module rate limiter mới, spec RÕ nhưng ít test sẵn. Pattern phù hợp?",
+       options:["Iterative","Spec-first (viết SPEC.md → AI sinh code + test từ spec)","Plan-driven","Không cần pattern nào"],
+       correct:1,
+       explanation:"Spec rõ + ít test = Spec-first: SPEC.md là source of truth, AI sinh đồng thời code và test từ acceptance criteria."},
+      {q:"Acceptance criteria nào ĐO LƯỜNG ĐƯỢC để AI có thể test against?",
+       options:["\"Hàm phải efficient.\"","\"Code phải sạch.\"","\"p95 latency < 50ms cho input 1000 phần tử.\"","\"Phải nhanh.\""],
+       correct:2,
+       explanation:"Criteria phải có con số đo được. 'efficient / sạch / nhanh' không test được nên AI không có gì để kiểm chứng."}
+    ]
+  },
+
+  /* ---------------- LEVEL 5 ---------------- */
+  {
+    id:5, titleVi:"Xây dựng & quy mô hoá AI cho team", titleEn:"Build & Scale",
+    intro:"Hiểu sâu cơ chế agent (tool calling, ReAct), build được MCP server, đảm bảo bảo mật, và thiết kế quy trình AI cho cả team.",
+    knowledge:[
+      {heading:"1. Tool / function calling lifecycle",
+       body:"Một tool call đi qua 5 bước, lặp đến khi xong:\n1) LLM emit tool_call (finish_reason = tool_calls) — kèm id, name, arguments (JSON string).\n2) Host parse arguments thành dict (json.loads).\n3) Tool chạy locally (function Python tương ứng).\n4) Đóng gói kết quả {result, error} rồi serialize JSON.\n5) Gửi observation về với role:\"tool\" và tool_call_id KHỚP id ban đầu.\nLặp đến finish_reason = stop → content là câu trả lời cuối.\nĐiểm thiết kế quan trọng: LLM KHÔNG bao giờ chạm file/shell trực tiếp — host làm trung gian, nên có thể chặn lệnh nguy hiểm ở bước approval (vd khi bị prompt injection).",
+       example:{cap:"Wire format (OpenAI-style)", code:
+"# LLM tra ve:\n{ \"finish_reason\": \"tool_calls\",\n  \"tool_calls\": [{ \"id\": \"call_abc\",\n    \"function\": { \"name\": \"read_file\",\n      \"arguments\": \"{ path: main.py }\" } }] }\n\n# Host gui lai observation:\n{ \"role\": \"tool\", \"tool_call_id\": \"call_abc\",\n  \"content\": \"# main.py ...\" }"}},
+      {heading:"2. ReAct loop & 4 bug kinh điển",
+       body:"ReAct = vòng lặp Thought → Action → Observation đến khi có final answer. Khi tự build agent, 4 bug hay gặp nhất:\n1) Quên append assistant message vào messages → LLM không thấy mình vừa gọi tool gì → gọi LẠI mãi (INFINITE LOOP). Đây là bug số 1.\n2) tool_call_id không khớp call.id (tự đặt UUID) → HTTP 400.\n3) content của tool message là str(dict) thay vì json.dumps → lỗi.\n4) Thiếu MAX_ITERATIONS → agent chạy mãi không dừng.",
+       example:{cap:"4 bug + dòng fix", code:
+"1. messages.append(msg)   # NGAY sau response (chong infinite loop)\n2. tool_call_id = call.id  # dung dung id tu LLM\n3. content = json.dumps(result)   # string, khong dict tho\n4. for i in range(MAX_ITERATIONS): ... else: raise"}},
+      {heading:"3. Build MCP server — agent-as-a-service",
+       body:"Đóng gói agent/script Python thành MCP server (thư viện FastMCP) để MỌI Claude Code session (của bạn hoặc teammate) gọi được như một tool. Mỗi script hữu ích đều có thể thành một 'tool node' trong hệ sinh thái lớn hơn.\nKhai báo trong ~/.claude.json: dùng ABSOLUTE path, và truyền API key qua mục 'env' (server không tự đọc .env của user khi Claude Code khởi tạo nó).",
+       example:{cap:"mcp_server.py + ~/.claude.json", code:
+"from mcp.server.fastmcp import FastMCP\nfrom agent import ReActAgent\nfrom llm import OpenAIClient\nmcp = FastMCP(\"mini-research-agent\")\n_agent = ReActAgent(OpenAIClient())\n@mcp.tool()\ndef ask_agent(question: str) -> str:\n    \"\"\"Run a multi-step ReAct agent. Returns final answer.\"\"\"\n    try: return _agent.run(question)\n    except Exception as e: return \"Agent failed: \" + str(e)\nif __name__ == \"__main__\": mcp.run()  # stdio\n\n# ~/.claude.json: command=python, args=[ABS path],\n#   env={ PYTHONPATH, OPENAI_API_KEY, TAVILY_API_KEY }"}},
+      {heading:"4. Bảo mật khi build",
+       body:"• Eval input từ user: KHÔNG dùng eval() thô — nó cho phép thực thi mã tuỳ ý, vd __import__('os').system('rm -rf /'). Dùng ast.parse + whitelist node (chỉ cho phép các node số học), reject Name/Call/Attribute.\n• Không hardcode secret: đọc từ .env / biến môi trường; CLAUDE.local.md (gitignore) chỉ để tham chiếu.\n• Prompt injection: host giữ bước approval để chặn hành động nguy hiểm; với agent tự build, validate tool args trước khi chạy.",
+       example:{cap:"Calculator an toàn (whitelist AST)", code:
+"_ALLOWED = {ast.Expression, ast.BinOp, ast.UnaryOp,\n  ast.Constant, ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow}\ndef _safe(node):\n  return all(type(n) in _ALLOWED for n in ast.walk(node))\n# parse + check _safe TRUOC khi eval(compile(node, ...))"}},
+      {heading:"5. Quy mô hoá & governance cho team",
+       body:"Thiết kế một quality pipeline nhiều lớp trước khi merge, kết hợp các cơ chế đã học:\n• Subagent reviewer (context riêng, read-only) chạy checklist convention.\n• Hook chạy test/format trước commit.\n• Convention chung trong CLAUDE.md cấp project để cả team đồng bộ.\n• Human sign-off ở commit (không auto-commit) + CI chạy lại test.\nGovernance: định nghĩa rõ KHI NÀO KHÔNG dùng AI — dữ liệu nhạy cảm/PII, yêu cầu compliance, code bảo mật lõi. Kỹ năng vibe coding chuyên nghiệp là vận hành cả quy trình, không chỉ tối ưu prompt."}
+    ],
+    questions:[
+      {q:"Agent bạn tự build lặp vô tận, mỗi vòng gọi LẠI cùng một tool. Nguyên nhân phổ biến nhất?",
+       options:["Thiếu MAX_ITERATIONS.","Quên append assistant message (response của LLM) vào messages.","tool_call_id bị sai.","Dùng eval() trong tool."],
+       correct:1,
+       explanation:"Bug #1: không append assistant message → LLM không thấy mình đã gọi tool → gọi lại mãi. Fix: messages.append(msg) ngay sau response. (Thiếu MAX_ITERATIONS chỉ làm mất chặn an toàn, không phải nguyên nhân lặp.)"},
+      {q:"Lần gọi LLM thứ 2 trả về HTTP 400. Khả năng cao nhất do?",
+       options:["Hết quota API.","tool_call_id không khớp call.id (hoặc content tool message không phải string).","Thiếu system prompt.","Model quá tải."],
+       correct:1,
+       explanation:"Phải dùng đúng call.id từ response và content = json.dumps(...) (string). Tự đặt UUID hoặc để dict thô → 400."},
+      {q:"Vì sao LLM KHÔNG tự chạm file/shell mà mọi thao tác phải qua host?",
+       options:["Vì model không có khả năng đó.","Bảo mật — host làm trung gian, chặn được lệnh nguy hiểm ở bước approval (vd prompt injection).","Để chạy nhanh hơn.","Vì giao thức HTTP cấm."],
+       correct:1,
+       explanation:"Tách biệt LLM ↔ file system là điểm thiết kế bảo mật: host duyệt trước khi thực thi, có cơ hội chặn nếu LLM bị prompt injection."},
+      {q:"Bạn muốn MỌI Claude Code session trong team gọi được một script Python hữu ích của bạn. Làm gì?",
+       options:["Copy-paste script vào từng project.","Đóng gói thành MCP server (FastMCP, @mcp.tool()) và khai báo trong ~/.claude.json.","Tạo một Slash command.","Đưa lên GitHub Gist."],
+       correct:1,
+       explanation:"Agent-as-a-service: bọc thành MCP server, khai báo absolute path + env. Mọi session/teammate cài cấu hình là gọi được như một tool."},
+      {q:"Bạn build tool calculator nhận biểu thức từ user. Vì sao tránh eval()? Cách an toàn?",
+       options:["eval chậm; dùng exec thay thế.","eval cho thực thi mã tuỳ ý (vd __import__('os').system(...)); dùng ast.parse + whitelist node.","eval không tính được số thực; dùng float().","Không sao cả, eval an toàn với input ngắn."],
+       correct:1,
+       explanation:"eval = lỗ hổng thực thi mã từ xa (RCE). An toàn: ast.parse(mode='eval') + chỉ cho phép node số học, reject Call/Name/Attribute trước khi tính."},
+      {q:"Một \"quality pipeline\" dùng AI cho team trước khi merge nên gồm gì?",
+       options:["Chỉ cần để AI tự review là đủ.","Subagent reviewer read-only + hook test/format + CLAUDE.md convention chung + human sign-off + CI.","Auto-commit mọi thứ AI sinh ra.","Tắt hết test cho nhanh."],
+       correct:1,
+       explanation:"Pipeline nhiều lớp + human sign-off + governance (khi nào KHÔNG dùng AI). (A) thiếu giám sát; (C)(D) nguy hiểm."}
+    ]
+  }
+];
+
+/* ============================== STATE ============================== */
+const STORAGE_KEY = "aiVibeAssessment.v2";
+const PASS_RATIO = 0.7;
+let state = loadState();
+let currentLevelId = null;      // null = overview
+let forceKnowledgeOpen = false;
+
+function defaultState(){ return { unlockedLevel:1, teacher:false, perLevel:{} }; }
+function loadState(){
+  try{ const s=JSON.parse(localStorage.getItem(STORAGE_KEY)); if(s&&s.perLevel){ if(typeof s.teacher!=="boolean") s.teacher=false; return s;} }catch(e){}
+  return defaultState();
+}
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function levelState(id){
+  let ls=state.perLevel[id];
+  if(!ls||!("choices" in ls)){ ls={choices:{},reasons:{},checked:{},passed:ls&&ls.passed||false}; state.perLevel[id]=ls; }
+  return ls;
+}
+function threshold(n){ return Math.ceil(PASS_RATIO*n); }
+function countCorrect(id){
+  const lv=LEVELS.find(l=>l.id===id), ls=state.perLevel[id]; if(!ls) return 0;
+  let c=0; lv.questions.forEach((q,i)=>{ if(ls.checked&&ls.checked[i]&&ls.choices[i]===q.correct) c++; }); return c;
+}
+function countAnswered(id){ const ls=state.perLevel[id]; if(!ls) return 0; return Object.keys(ls.choices||{}).length; }
+function passedCount(){ return LEVELS.filter(l=>state.perLevel[l.id]&&state.perLevel[l.id].passed).length; }
+function isUnlocked(id){ return state.teacher || id<=state.unlockedLevel; }
+
+/* ============================== DOM HELPER ============================== */
+function h(tag, attrs, ...kids){
+  const e=document.createElement(tag); attrs=attrs||{};
+  for(const k in attrs){ const v=attrs[k]; if(v==null||v===false) continue;
+    if(k==="class") e.className=v;
+    else if(k==="html") e.innerHTML=v;
+    else if(k.slice(0,2)==="on"&&typeof v==="function") e.addEventListener(k.slice(2).toLowerCase(),v);
+    else e.setAttribute(k,v); }
+  kids.flat().forEach(c=>{ if(c==null||c===false) return;
+    e.appendChild(typeof c==="object"?c:document.createTextNode(String(c))); });
+  return e;
+}
+const LETTER=["A","B","C","D","E","F"];
+
+/* ============================== RENDER ============================== */
+function render(){
+  const app=document.getElementById("app"); app.innerHTML="";
+  app.appendChild(header());
+  app.appendChild(currentLevelId==null?overview():levelView(currentLevelId));
+  window.scrollTo(0,0);
+}
+
+function header(){
+  const right=[];
+  right.push(h("div",{class:"pill"},"Đã pass: ",h("b",{},passedCount()+" / "+LEVELS.length)));
+  if(state.teacher){
+    right.push(h("span",{class:"badge teacher"},"👩‍🏫 Teacher mode"));
+    right.push(h("button",{class:"btn ghost sm",onclick:exitTeacher},"Thoát GV"));
+  }else{
+    right.push(h("button",{class:"btn ghost sm",onclick:promptTeacher},"👩‍🏫 Giáo viên"));
+  }
+  right.push(h("button",{class:"btn ghost sm",onclick:resetProgress},"Reset"));
+  return h("header",{class:"bar"},
+    h("div",{},
+      h("h1",{},"🤖 Đánh giá năng lực AI & Vibe Coding"),
+      h("div",{class:"sub"},"5 Level · trắc nghiệm tình huống + ghi lý do · cho team developer")),
+    h("div",{class:"spacer"}), ...right);
+}
+
+function overview(){
+  const box=h("div",{});
+  box.appendChild(h("div",{class:"intro"},
+    h("h2",{},"Cách hoạt động"),
+    h("p",{},"Mỗi level có 6 câu hỏi tình huống dạng trắc nghiệm (4 đáp án). Chọn đáp án, ghi thêm lý do bạn chọn (không tính điểm, để rèn tư duy), bấm “Kiểm tra” để xem đúng/sai + giải thích."),
+    h("p",{},"Đạt ngưỡng (≥ 70% số câu đúng) thì mở khoá level kế tiếp. Nếu chưa đạt, phần “Kiến thức cần nắm” (có ví dụ cụ thể) sẽ tự mở để bạn ôn rồi làm lại."),
+    h("p",{},state.teacher?"👩‍🏫 Teacher mode đang BẬT: mọi level đã mở khoá, có thể nhảy/skip tuỳ ý.":"Giáo viên có thể bấm “Giáo viên” (nhập PIN) để mở khoá & nhảy nhanh tới level bất kỳ cho người đã giỏi."),
+    h("div",{class:"rules"},
+      h("span",{class:"tag"},"🔓 Mở dần theo level"),
+      h("span",{class:"tag"},"☑️ Trắc nghiệm tự chấm"),
+      h("span",{class:"tag"},"✍️ Ô ghi lý do"),
+      h("span",{class:"tag"},"💾 Lưu tiến độ trong trình duyệt"))
+  ));
+  const road=h("div",{class:"roadmap"});
+  LEVELS.forEach(lv=>{
+    const ls=state.perLevel[lv.id];
+    const locked=!isUnlocked(lv.id);
+    const passed=ls&&ls.passed;
+    const started=countAnswered(lv.id)>0;
+    let badge;
+    if(locked) badge=h("span",{class:"badge lock"},"🔒 Khoá");
+    else if(passed) badge=h("span",{class:"badge pass"},"✓ Đã đạt ("+countCorrect(lv.id)+"/"+lv.questions.length+")");
+    else if(started) badge=h("span",{class:"badge partial"},"… Đang làm");
+    else badge=h("span",{class:"badge todo"},"Sẵn sàng");
+    const card=h("div",{class:"lvl "+(locked?"locked":"open")+(passed?" passed":""),
+        onclick:locked?null:()=>{currentLevelId=lv.id;forceKnowledgeOpen=false;render();}},
+      h("div",{class:"num"},locked?"🔒":String(lv.id)),
+      h("div",{class:"body"},
+        h("div",{class:"t"},"Level "+lv.id+" — "+lv.titleVi),
+        h("div",{class:"te"},lv.titleEn),
+        h("div",{class:"d"},lv.intro),
+        h("div",{class:"meta"}, badge,
+          locked?h("span",{class:"d"},"→ pass Level "+(lv.id-1)+" để mở"):h("span",{class:"d"},lv.questions.length+" câu · "+lv.knowledge.length+" mục kiến thức"))));
+    road.appendChild(card);
+  });
+  box.appendChild(road);
+  return box;
+}
+
+function levelView(id){
+  const lv=LEVELS.find(l=>l.id===id);
+  const ls=levelState(id);
+  const box=h("div",{});
+  box.appendChild(h("button",{class:"back",onclick:()=>{currentLevelId=null;render();}},"← Về lộ trình"));
+
+  if(state.teacher){
+    const jump=h("div",{class:"jump"});
+    LEVELS.forEach(l=>jump.appendChild(h("button",{class:"jb"+(l.id===id?" cur":""),
+      onclick:()=>{currentLevelId=l.id;forceKnowledgeOpen=false;render();}},"L"+l.id)));
+    box.appendChild(h("div",{class:"teacher-bar"},
+      h("span",{class:"lab"},"👩‍🏫 Teacher:"), jump, h("div",{class:"spacer"}),
+      h("button",{class:"btn warn sm",onclick:()=>teacherPass(id)}, id<LEVELS.length?"⏭ Đánh dấu đạt & sang Level "+(id+1):"⏭ Đánh dấu đạt")));
+  }
+
+  box.appendChild(h("div",{class:"lvl-head"},
+    h("div",{class:"num"},String(lv.id)),
+    h("div",{},
+      h("h2",{},"Level "+lv.id+" — "+lv.titleVi),
+      h("div",{class:"te"},lv.titleEn+" · "+lv.intro))));
+
+  /* knowledge */
+  box.appendChild(h("div",{class:"section-label"},"📚 Kiến thức cần nắm (có ví dụ)"));
+  const det=h("details",{class:"know"+(forceKnowledgeOpen?" flash":"")});
+  if(forceKnowledgeOpen) det.open=true;
+  det.appendChild(h("summary",{},h("span",{class:"chev"},"▶"),"Mở bài giảng Level "+lv.id+" — cách dùng & cách custom ("+lv.knowledge.length+" mục)"));
+  const inner=h("div",{class:"know-inner"});
+  lv.knowledge.forEach(k=>{
+    const block=h("div",{class:"lesson"}, h("h4",{},k.heading), h("p",{},k.body));
+    if(k.example){
+      block.appendChild(h("div",{class:"ex-cap"},"▎ "+k.example.cap));
+      const pre=h("pre",{}); const code=h("code",{}); code.textContent=k.example.code; pre.appendChild(code); block.appendChild(pre);
+    }
+    inner.appendChild(block);
+  });
+  det.appendChild(inner); box.appendChild(det);
+
+  /* questions */
+  box.appendChild(h("div",{class:"section-label"},"📝 Câu hỏi tình huống ("+lv.questions.length+" — trắc nghiệm)"));
+  lv.questions.forEach((qq,i)=>box.appendChild(questionCard(lv,i,qq,ls)));
+
+  /* scorebar */
+  const need=threshold(lv.questions.length);
+  box.appendChild(h("div",{class:"scorebar"},
+    h("div",{class:"stat"},"Đúng: ",h("b",{id:"corrnum"},String(countCorrect(id))),
+      " — cần ≥ "+need+" / "+lv.questions.length+" để pass"),
+    h("div",{class:"spacer"}),
+    h("button",{class:"btn",onclick:()=>submitLevel(id)},"Nộp & chấm Level "+id)));
+  box.appendChild(h("div",{class:"result",id:"result"}));
+  return box;
+}
+
+function questionCard(lv,i,qq,ls){
+  const checked=!!(ls.checked&&ls.checked[i]);
+  const chosen=ls.choices[i];
+  let stateCls="";
+  if(checked) stateCls = chosen===qq.correct ? " done-ok" : " done-no";
+  const card=h("div",{class:"q"+stateCls,id:"q"+i});
+  card.appendChild(h("div",{class:"qn"},"CÂU "+(i+1)));
+  card.appendChild(h("div",{class:"qt"},qq.q));
+
+  const optEls=[];
+  qq.options.forEach((opt,oi)=>{
+    let cls="opt";
+    if(checked){ cls+=" locked"; if(oi===qq.correct) cls+=" correct"; else if(oi===chosen) cls+=" wrong"; }
+    else if(chosen===oi) cls+=" selected";
+    const row=h("div",{class:cls},
+      h("div",{class:"mk"}, checked&&oi===qq.correct?"✓":(checked&&oi===chosen?"✗":LETTER[oi])),
+      h("div",{class:"ot"},opt));
+    if(!checked){ row.addEventListener("click",()=>{
+      ls.choices[i]=oi; saveState();
+      optEls.forEach((r,ri)=>{ r.className="opt"+(ri===oi?" selected":""); });
+    }); }
+    optEls.push(row); card.appendChild(row);
+  });
+
+  const expl=h("div",{class:"expl"+(checked?" show":"")},
+    h("b",{},"Giải thích: "), qq.explanation);
+  card.appendChild(expl);
+
+  const reason=h("div",{class:"reason"},
+    h("label",{},"✍️ Ghi lý do bạn chọn (không tính điểm — để rèn tư duy):"));
+  const ta=h("textarea",{placeholder:"Vì sao bạn chọn đáp án đó? Bạn loại các phương án khác vì lý do gì?",
+    oninput:e=>{ls.reasons[i]=e.target.value;saveState();}});
+  ta.value=(ls.reasons&&ls.reasons[i])||""; reason.appendChild(ta); card.appendChild(reason);
+
+  const checkBtn=h("button",{class:"btn ghost sm"}, checked?"✓ Đã kiểm tra":"Kiểm tra câu này");
+  if(!checked){
+    checkBtn.addEventListener("click",()=>{
+      if(ls.choices[i]==null){ checkBtn.textContent="⚠ Hãy chọn một đáp án"; setTimeout(()=>checkBtn.textContent="Kiểm tra câu này",1400); return; }
+      ls.checked[i]=true; saveState();
+      const ch=ls.choices[i];
+      optEls.forEach((r,ri)=>{ let c="opt locked"; if(ri===qq.correct) c+=" correct"; else if(ri===ch) c+=" wrong"; r.className=c;
+        r.firstChild.textContent = ri===qq.correct?"✓":(ri===ch?"✗":LETTER[ri]); });
+      expl.classList.add("show");
+      card.className="q "+(ch===qq.correct?"done-ok":"done-no"); card.id="q"+i;
+      checkBtn.textContent="✓ Đã kiểm tra"; checkBtn.disabled=true;
+      const cn=document.getElementById("corrnum"); if(cn) cn.textContent=String(countCorrect(lv.id));
+    });
+  }else checkBtn.disabled=true;
+  card.appendChild(h("div",{class:"qbar"}, checkBtn));
+  return card;
+}
+
+/* ============================== ACTIONS ============================== */
+function submitLevel(id){
+  const lv=LEVELS.find(l=>l.id===id), ls=levelState(id), total=lv.questions.length;
+  const res=document.getElementById("result");
+  let unanswered=0; for(let i=0;i<total;i++) if(ls.choices[i]==null) unanswered++;
+  if(unanswered>0){
+    res.className="result warn show"; res.innerHTML="";
+    res.appendChild(h("h3",{},"⚠ Còn câu chưa chọn"));
+    res.appendChild(h("p",{},"Còn "+unanswered+" câu chưa chọn đáp án. Hãy chọn đủ "+total+" câu rồi nộp."));
+    res.scrollIntoView({behavior:"smooth",block:"center"}); return;
+  }
+  for(let i=0;i<total;i++) ls.checked[i]=true;          // chấm hết
+  const correct=countCorrect(id), need=threshold(total), passed=correct>=need;
+  ls.passed=passed;
+  if(passed) state.unlockedLevel=Math.max(state.unlockedLevel, Math.min(id+1, LEVELS.length));
+  if(!passed) forceKnowledgeOpen=true;
+  saveState();
+  render();                                              // vẽ lại: lộ hết đáp án + giải thích
+  showResult(id,correct,total,need,passed);
+}
+
+function showResult(id,correct,total,need,passed){
+  const res=document.getElementById("result"); if(!res) return;
+  res.innerHTML="";
+  if(passed){
+    res.className="result ok show";
+    res.appendChild(h("h3",{},"🎉 Đạt Level "+id+"! ("+correct+"/"+total+" đúng)"));
+    res.appendChild(h("p",{}, id<LEVELS.length?"Bạn đã mở khoá Level "+(id+1)+". Tiếp tục nào!":"Bạn đã hoàn thành cả 5 level — bậc thầy AI & Vibe Coding! 🏆"));
+    const acts=h("div",{class:"acts"});
+    if(id<LEVELS.length) acts.appendChild(h("button",{class:"btn",onclick:()=>{currentLevelId=id+1;forceKnowledgeOpen=false;render();}},"→ Vào Level "+(id+1)));
+    acts.appendChild(h("button",{class:"btn ghost",onclick:()=>{currentLevelId=null;render();}},"Về lộ trình"));
+    res.appendChild(acts);
+  }else{
+    res.className="result no show";
+    res.appendChild(h("h3",{},"Chưa đạt ("+correct+"/"+total+" đúng, cần ≥ "+need+")"));
+    res.appendChild(h("p",{},"Đừng lo — phần “Kiến thức cần nắm” bên trên đã tự mở (có ví dụ cách dùng & cách custom). Đọc lại, xem giải thích từng câu sai, rồi sửa đáp án và nộp lại."));
+    const acts=h("div",{class:"acts"});
+    acts.appendChild(h("button",{class:"btn",onclick:()=>{const d=document.querySelector("details.know"); if(d){d.open=true; d.scrollIntoView({behavior:"smooth",block:"start"});}}},"📚 Tới phần kiến thức"));
+    acts.appendChild(h("button",{class:"btn ghost",onclick:()=>{currentLevelId=null;render();}},"Về lộ trình"));
+    res.appendChild(acts);
+  }
+  res.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+/* ----- teacher ----- */
+function promptTeacher(){
+  const pin=prompt("Nhập PIN giáo viên để mở khoá & nhảy level:");
+  if(pin==null) return;
+  if(pin===TEACHER_PIN){ state.teacher=true; saveState(); render(); }
+  else alert("Sai PIN.");
+}
+function exitTeacher(){ state.teacher=false; saveState(); render(); }
+function teacherPass(id){
+  const ls=levelState(id); ls.passed=true;
+  state.unlockedLevel=Math.max(state.unlockedLevel, Math.min(id+1, LEVELS.length));
+  saveState();
+  if(id<LEVELS.length){ currentLevelId=id+1; } else { currentLevelId=null; }
+  forceKnowledgeOpen=false; render();
+}
+
+function resetProgress(){
+  if(!confirm("Xoá toàn bộ tiến độ, đáp án và lý do đã lưu? (Teacher mode cũng tắt). Không hoàn tác được.")) return;
+  state=defaultState(); saveState(); currentLevelId=null; forceKnowledgeOpen=false; render();
+}
+
+/* ============================== INIT ============================== */
+render();
+</script>
+</body>
+</html>
