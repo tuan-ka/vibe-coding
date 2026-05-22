@@ -127,6 +127,14 @@
     border-radius:10px;padding:9px 12px;font-family:inherit;font-size:13px;resize:vertical}
   textarea:focus{outline:none;border-color:var(--accent)}
   .qbar{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .qhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .toolbadge{font-size:11px;font-weight:800;background:rgba(108,140,255,.16);color:#9db4ff;
+    border:1px solid rgba(108,140,255,.35);border-radius:999px;padding:2px 9px}
+  .toolhint{font-size:12px;color:var(--muted);background:var(--bg2);border-left:3px solid var(--accent);
+    padding:7px 11px;border-radius:0 8px 8px 0;margin:8px 0}
+  .q.na{opacity:.72}
+  .q.na .opts{opacity:.45}
+  .opts.disabled .opt{cursor:default}
   /* footer */
   .scorebar{position:sticky;bottom:0;background:rgba(16,20,32,.92);backdrop-filter:blur(8px);
     border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;margin-top:20px;
@@ -415,6 +423,9 @@ const LEVELS = [
 /* ============================== STATE ============================== */
 const STORAGE_KEY = "aiVibeAssessment.v2";
 const PASS_RATIO = 0.7;
+/* Câu ĐẶC THÙ Claude Code (chỉ số 0-based theo từng level). Người dùng Copilot/Cursor
+   có thể bấm "Không áp dụng" — câu đó bị loại khỏi điểm. Sửa map này nếu muốn đổi. */
+const CLAUDE_SPECIFIC = { 2:[2,3], 3:[0,1,2,3,4,5], 4:[0,1], 5:[3,5] };
 let state = loadState();
 let currentLevelId = null;      // null = overview
 let forceKnowledgeOpen = false;
@@ -427,17 +438,32 @@ function loadState(){
 function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
 function levelState(id){
   let ls=state.perLevel[id];
-  if(!ls||!("choices" in ls)){ ls={choices:{},reasons:{},checked:{},passed:ls&&ls.passed||false}; state.perLevel[id]=ls; }
+  if(!ls||!("choices" in ls)){ ls={choices:{},reasons:{},checked:{},na:{},passed:ls&&ls.passed||false}; state.perLevel[id]=ls; }
+  if(!ls.na) ls.na={};
   return ls;
 }
 function threshold(n){ return Math.ceil(PASS_RATIO*n); }
+function isClaudeQ(lid,i){ return (CLAUDE_SPECIFIC[lid]||[]).includes(i); }
+function applicableCount(id){
+  const lv=LEVELS.find(l=>l.id===id), ls=state.perLevel[id]; let n=0;
+  lv.questions.forEach((q,i)=>{ if(!(ls&&ls.na&&ls.na[i])) n++; }); return n;
+}
 function countCorrect(id){
   const lv=LEVELS.find(l=>l.id===id), ls=state.perLevel[id]; if(!ls) return 0;
-  let c=0; lv.questions.forEach((q,i)=>{ if(ls.checked&&ls.checked[i]&&ls.choices[i]===q.correct) c++; }); return c;
+  let c=0; lv.questions.forEach((q,i)=>{ if(ls.na&&ls.na[i]) return; if(ls.checked&&ls.checked[i]&&ls.choices[i]===q.correct) c++; }); return c;
 }
-function countAnswered(id){ const ls=state.perLevel[id]; if(!ls) return 0; return Object.keys(ls.choices||{}).length; }
+function countAnswered(id){ const ls=state.perLevel[id]; if(!ls) return 0; return Object.keys(ls.choices||{}).length + Object.keys(ls.na||{}).length; }
 function passedCount(){ return LEVELS.filter(l=>state.perLevel[l.id]&&state.perLevel[l.id].passed).length; }
 function isUnlocked(id){ return state.teacher || id<=state.unlockedLevel; }
+function fillStat(el,id){
+  const lv=LEVELS.find(l=>l.id===id), total=lv.questions.length;
+  const app=applicableCount(id), na=total-app, corr=countCorrect(id), need=app>0?threshold(app):0;
+  el.innerHTML="";
+  el.appendChild(document.createTextNode("Đúng: "));
+  el.appendChild(h("b",{},String(corr)));
+  el.appendChild(document.createTextNode(" / áp dụng "+app+(na>0?(" (bỏ "+na+" câu N/A)"):"")+" — cần ≥ "+need+" để pass"));
+}
+function updateScoreBar(id){ const el=document.getElementById("scorestat"); if(el) fillStat(el,id); }
 
 /* ============================== DOM HELPER ============================== */
 function h(tag, attrs, ...kids){
@@ -483,13 +509,14 @@ function overview(){
   box.appendChild(h("div",{class:"intro"},
     h("h2",{},"Cách hoạt động"),
     h("p",{},"Mỗi level có 6 câu hỏi tình huống dạng trắc nghiệm (4 đáp án). Chọn đáp án, ghi thêm lý do bạn chọn (không tính điểm, để rèn tư duy), bấm “Kiểm tra” để xem đúng/sai + giải thích."),
-    h("p",{},"Đạt ngưỡng (≥ 70% số câu đúng) thì mở khoá level kế tiếp. Nếu chưa đạt, phần “Kiến thức cần nắm” (có ví dụ cụ thể) sẽ tự mở để bạn ôn rồi làm lại."),
+    h("p",{},"Câu gắn nhãn “🔷 Đặc thù Claude Code” — nếu bạn dùng Copilot / Cursor (không dùng Claude Code) — có thể bấm “Không áp dụng”. Câu đó sẽ KHÔNG tính vào điểm; ngưỡng pass tính trên số câu áp dụng."),
+    h("p",{},"Đạt ngưỡng (≥ 70% số câu ÁP DỤNG đúng) thì mở khoá level kế tiếp. Nếu chưa đạt, phần “Kiến thức cần nắm” (có ví dụ cụ thể) sẽ tự mở để bạn ôn rồi làm lại."),
     h("p",{},state.teacher?"👩‍🏫 Teacher mode đang BẬT: mọi level đã mở khoá, có thể nhảy/skip tuỳ ý.":"Giáo viên có thể bấm “Giáo viên” (nhập PIN) để mở khoá & nhảy nhanh tới level bất kỳ cho người đã giỏi."),
     h("div",{class:"rules"},
       h("span",{class:"tag"},"🔓 Mở dần theo level"),
       h("span",{class:"tag"},"☑️ Trắc nghiệm tự chấm"),
-      h("span",{class:"tag"},"✍️ Ô ghi lý do"),
-      h("span",{class:"tag"},"💾 Lưu tiến độ trong trình duyệt"))
+      h("span",{class:"tag"},"🔷 Câu Claude có thể “Không áp dụng”"),
+      h("span",{class:"tag"},"✍️ Ô ghi lý do"))
   ));
   const road=h("div",{class:"roadmap"});
   LEVELS.forEach(lv=>{
@@ -499,7 +526,9 @@ function overview(){
     const started=countAnswered(lv.id)>0;
     let badge;
     if(locked) badge=h("span",{class:"badge lock"},"🔒 Khoá");
-    else if(passed) badge=h("span",{class:"badge pass"},"✓ Đã đạt ("+countCorrect(lv.id)+"/"+lv.questions.length+")");
+    else if(passed){ const ap=applicableCount(lv.id);
+      badge = ap===0 ? h("span",{class:"badge partial"},"↪ Bỏ qua (N/A)")
+                     : h("span",{class:"badge pass"},"✓ Đã đạt ("+countCorrect(lv.id)+"/"+ap+")"); }
     else if(started) badge=h("span",{class:"badge partial"},"… Đang làm");
     else badge=h("span",{class:"badge todo"},"Sẵn sàng");
     const card=h("div",{class:"lvl "+(locked?"locked":"open")+(passed?" passed":""),
@@ -559,42 +588,46 @@ function levelView(id){
   lv.questions.forEach((qq,i)=>box.appendChild(questionCard(lv,i,qq,ls)));
 
   /* scorebar */
-  const need=threshold(lv.questions.length);
-  box.appendChild(h("div",{class:"scorebar"},
-    h("div",{class:"stat"},"Đúng: ",h("b",{id:"corrnum"},String(countCorrect(id))),
-      " — cần ≥ "+need+" / "+lv.questions.length+" để pass"),
-    h("div",{class:"spacer"}),
+  const stat=h("div",{class:"stat",id:"scorestat"}); fillStat(stat,id);
+  box.appendChild(h("div",{class:"scorebar"}, stat, h("div",{class:"spacer"}),
     h("button",{class:"btn",onclick:()=>submitLevel(id)},"Nộp & chấm Level "+id)));
   box.appendChild(h("div",{class:"result",id:"result"}));
   return box;
 }
 
 function questionCard(lv,i,qq,ls){
-  const checked=!!(ls.checked&&ls.checked[i]);
+  const isCl=isClaudeQ(lv.id,i);
+  const na=!!(ls.na&&ls.na[i]);
+  const checked=!na && !!(ls.checked&&ls.checked[i]);
   const chosen=ls.choices[i];
-  let stateCls="";
-  if(checked) stateCls = chosen===qq.correct ? " done-ok" : " done-no";
+  let stateCls=""; if(na) stateCls=" na"; else if(checked) stateCls = chosen===qq.correct?" done-ok":" done-no";
   const card=h("div",{class:"q"+stateCls,id:"q"+i});
-  card.appendChild(h("div",{class:"qn"},"CÂU "+(i+1)));
-  card.appendChild(h("div",{class:"qt"},qq.q));
 
+  const head=h("div",{class:"qhead"}, h("span",{class:"qn"},"CÂU "+(i+1)));
+  if(isCl) head.appendChild(h("span",{class:"toolbadge"},"🔷 Đặc thù Claude Code"));
+  card.appendChild(head);
+  card.appendChild(h("div",{class:"qt"},qq.q));
+  if(isCl) card.appendChild(h("div",{class:"toolhint"},"Dùng Copilot / Cursor (không dùng Claude Code)? Bạn có thể bấm “Không áp dụng” — câu này sẽ không tính vào điểm."));
+
+  const optWrap=h("div",{class:"opts"+(na?" disabled":"")});
   const optEls=[];
   qq.options.forEach((opt,oi)=>{
     let cls="opt";
-    if(checked){ cls+=" locked"; if(oi===qq.correct) cls+=" correct"; else if(oi===chosen) cls+=" wrong"; }
+    if(na) cls+=" locked";
+    else if(checked){ cls+=" locked"; if(oi===qq.correct) cls+=" correct"; else if(oi===chosen) cls+=" wrong"; }
     else if(chosen===oi) cls+=" selected";
     const row=h("div",{class:cls},
-      h("div",{class:"mk"}, checked&&oi===qq.correct?"✓":(checked&&oi===chosen?"✗":LETTER[oi])),
+      h("div",{class:"mk"}, (!na&&checked&&oi===qq.correct)?"✓":((!na&&checked&&oi===chosen)?"✗":LETTER[oi])),
       h("div",{class:"ot"},opt));
-    if(!checked){ row.addEventListener("click",()=>{
+    if(!checked&&!na){ row.addEventListener("click",()=>{
       ls.choices[i]=oi; saveState();
       optEls.forEach((r,ri)=>{ r.className="opt"+(ri===oi?" selected":""); });
     }); }
-    optEls.push(row); card.appendChild(row);
+    optEls.push(row); optWrap.appendChild(row);
   });
+  card.appendChild(optWrap);
 
-  const expl=h("div",{class:"expl"+(checked?" show":"")},
-    h("b",{},"Giải thích: "), qq.explanation);
+  const expl=h("div",{class:"expl"+(checked?" show":"")}, h("b",{},"Giải thích: "), qq.explanation);
   card.appendChild(expl);
 
   const reason=h("div",{class:"reason"},
@@ -603,8 +636,10 @@ function questionCard(lv,i,qq,ls){
     oninput:e=>{ls.reasons[i]=e.target.value;saveState();}});
   ta.value=(ls.reasons&&ls.reasons[i])||""; reason.appendChild(ta); card.appendChild(reason);
 
+  const bar=h("div",{class:"qbar"});
   const checkBtn=h("button",{class:"btn ghost sm"}, checked?"✓ Đã kiểm tra":"Kiểm tra câu này");
-  if(!checked){
+  if(na||checked) checkBtn.disabled=true;
+  if(!checked&&!na){
     checkBtn.addEventListener("click",()=>{
       if(ls.choices[i]==null){ checkBtn.textContent="⚠ Hãy chọn một đáp án"; setTimeout(()=>checkBtn.textContent="Kiểm tra câu này",1400); return; }
       ls.checked[i]=true; saveState();
@@ -612,56 +647,72 @@ function questionCard(lv,i,qq,ls){
       optEls.forEach((r,ri)=>{ let c="opt locked"; if(ri===qq.correct) c+=" correct"; else if(ri===ch) c+=" wrong"; r.className=c;
         r.firstChild.textContent = ri===qq.correct?"✓":(ri===ch?"✗":LETTER[ri]); });
       expl.classList.add("show");
-      card.className="q "+(ch===qq.correct?"done-ok":"done-no"); card.id="q"+i;
+      card.className="q "+(ch===qq.correct?"done-ok":"done-no");
       checkBtn.textContent="✓ Đã kiểm tra"; checkBtn.disabled=true;
-      const cn=document.getElementById("corrnum"); if(cn) cn.textContent=String(countCorrect(lv.id));
+      updateScoreBar(lv.id);
     });
-  }else checkBtn.disabled=true;
-  card.appendChild(h("div",{class:"qbar"}, checkBtn));
+  }
+  bar.appendChild(checkBtn);
+  if(isCl){
+    const naBtn=h("button",{class:"btn sm "+(na?"warn":"ghost")}, na?"✓ Không áp dụng (đang bỏ qua)":"🚫 Không áp dụng (tôi dùng tool khác)");
+    naBtn.addEventListener("click",()=>{
+      if(!ls.na) ls.na={};
+      if(ls.na[i]) delete ls.na[i];
+      else { ls.na[i]=true; delete ls.choices[i]; if(ls.checked) delete ls.checked[i]; }
+      saveState(); rerenderCard(lv,i); updateScoreBar(lv.id);
+    });
+    bar.appendChild(naBtn);
+  }
+  card.appendChild(bar);
   return card;
+}
+function rerenderCard(lv,i){
+  const old=document.getElementById("q"+i);
+  if(old&&old.parentNode) old.parentNode.replaceChild(questionCard(lv,i,lv.questions[i],levelState(lv.id)), old);
 }
 
 /* ============================== ACTIONS ============================== */
 function submitLevel(id){
   const lv=LEVELS.find(l=>l.id===id), ls=levelState(id), total=lv.questions.length;
   const res=document.getElementById("result");
-  let unanswered=0; for(let i=0;i<total;i++) if(ls.choices[i]==null) unanswered++;
-  if(unanswered>0){
+  let missing=0; for(let i=0;i<total;i++){ if(ls.na&&ls.na[i]) continue; if(ls.choices[i]==null) missing++; }
+  if(missing>0){
     res.className="result warn show"; res.innerHTML="";
-    res.appendChild(h("h3",{},"⚠ Còn câu chưa chọn"));
-    res.appendChild(h("p",{},"Còn "+unanswered+" câu chưa chọn đáp án. Hãy chọn đủ "+total+" câu rồi nộp."));
+    res.appendChild(h("h3",{},"⚠ Còn câu chưa hoàn tất"));
+    res.appendChild(h("p",{},"Còn "+missing+" câu chưa chọn đáp án (hoặc đánh dấu “Không áp dụng”). Hãy hoàn tất rồi nộp."));
     res.scrollIntoView({behavior:"smooth",block:"center"}); return;
   }
-  for(let i=0;i<total;i++) ls.checked[i]=true;          // chấm hết
-  const correct=countCorrect(id), need=threshold(total), passed=correct>=need;
+  for(let i=0;i<total;i++){ if(!(ls.na&&ls.na[i])) ls.checked[i]=true; }   // chấm hết câu áp dụng
+  const app=applicableCount(id), correct=countCorrect(id), need=app>0?threshold(app):0;
+  const passed = app===0 ? true : correct>=need;
   ls.passed=passed;
   if(passed) state.unlockedLevel=Math.max(state.unlockedLevel, Math.min(id+1, LEVELS.length));
   if(!passed) forceKnowledgeOpen=true;
   saveState();
   render();                                              // vẽ lại: lộ hết đáp án + giải thích
-  showResult(id,correct,total,need,passed);
+  showResult(id,correct,app,need,passed,total-app);
 }
 
-function showResult(id,correct,total,need,passed){
-  const res=document.getElementById("result"); if(!res) return;
-  res.innerHTML="";
-  if(passed){
+function showResult(id,correct,app,need,passed,na){
+  const res=document.getElementById("result"); if(!res) return; res.innerHTML="";
+  if(passed && app===0){
     res.className="result ok show";
-    res.appendChild(h("h3",{},"🎉 Đạt Level "+id+"! ("+correct+"/"+total+" đúng)"));
+    res.appendChild(h("h3",{},"↪ Level "+id+" — đã bỏ qua (Không áp dụng)"));
+    res.appendChild(h("p",{},"Bạn đã đánh dấu toàn bộ câu của level này là “Không áp dụng” (đặc thù Claude Code). Level được bỏ qua. "+(id<LEVELS.length?"Level "+(id+1)+" đã mở khoá.":"Bạn đã tới cuối lộ trình.")));
+  }else if(passed){
+    res.className="result ok show";
+    res.appendChild(h("h3",{},"🎉 Đạt Level "+id+"! ("+correct+"/"+app+" câu áp dụng đúng"+(na>0?(", bỏ "+na+" câu N/A"):"")+")"));
     res.appendChild(h("p",{}, id<LEVELS.length?"Bạn đã mở khoá Level "+(id+1)+". Tiếp tục nào!":"Bạn đã hoàn thành cả 5 level — bậc thầy AI & Vibe Coding! 🏆"));
-    const acts=h("div",{class:"acts"});
-    if(id<LEVELS.length) acts.appendChild(h("button",{class:"btn",onclick:()=>{currentLevelId=id+1;forceKnowledgeOpen=false;render();}},"→ Vào Level "+(id+1)));
-    acts.appendChild(h("button",{class:"btn ghost",onclick:()=>{currentLevelId=null;render();}},"Về lộ trình"));
-    res.appendChild(acts);
   }else{
     res.className="result no show";
-    res.appendChild(h("h3",{},"Chưa đạt ("+correct+"/"+total+" đúng, cần ≥ "+need+")"));
-    res.appendChild(h("p",{},"Đừng lo — phần “Kiến thức cần nắm” bên trên đã tự mở (có ví dụ cách dùng & cách custom). Đọc lại, xem giải thích từng câu sai, rồi sửa đáp án và nộp lại."));
-    const acts=h("div",{class:"acts"});
-    acts.appendChild(h("button",{class:"btn",onclick:()=>{const d=document.querySelector("details.know"); if(d){d.open=true; d.scrollIntoView({behavior:"smooth",block:"start"});}}},"📚 Tới phần kiến thức"));
-    acts.appendChild(h("button",{class:"btn ghost",onclick:()=>{currentLevelId=null;render();}},"Về lộ trình"));
-    res.appendChild(acts);
+    res.appendChild(h("h3",{},"Chưa đạt ("+correct+"/"+app+" đúng, cần ≥ "+need+")"));
+    res.appendChild(h("p",{},"Đừng lo — phần “Kiến thức cần nắm” bên trên đã tự mở (có ví dụ). Đọc lại, xem giải thích từng câu sai, rồi sửa đáp án và nộp lại."));
   }
+  const acts=h("div",{class:"acts"});
+  if(passed && id<LEVELS.length) acts.appendChild(h("button",{class:"btn",onclick:()=>{currentLevelId=id+1;forceKnowledgeOpen=false;render();}},"→ Vào Level "+(id+1)));
+  if(!passed) acts.appendChild(h("button",{class:"btn",onclick:()=>{const d=document.querySelector("details.know"); if(d){d.open=true; d.scrollIntoView({behavior:"smooth",block:"start"});}}},"📚 Tới phần kiến thức"));
+  acts.appendChild(h("button",{class:"btn ghost",onclick:()=>{currentLevelId=null;render();}},"Về lộ trình"));
+  res.appendChild(acts);
   res.scrollIntoView({behavior:"smooth",block:"center"});
 }
 
